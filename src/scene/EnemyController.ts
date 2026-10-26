@@ -73,7 +73,7 @@ export class EnemyController {
     ironTex.uScale = 1;
     ironTex.vScale = 1;
     bodyMat.diffuseTexture = ironTex;
-    bodyMat.diffuseColor = new Color3(0.55, 0.48, 0.45);
+    bodyMat.diffuseColor = new Color3(0.58, 0.52, 0.48);
     bodyMat.specularColor = new Color3(0.1, 0.09, 0.08);
 
     // Weathered bone / horn material
@@ -88,68 +88,172 @@ export class EnemyController {
 
     const parts: Mesh[] = [];
 
-    // 1. Root Capsule Body (Physics anchor)
+    // 1. INVISIBLE Physics Root Capsule (No cylinder visible to the player!)
     const root = MeshBuilder.CreateCapsule(
       `enemyRoot_${id}`,
       { height: 1.8, radius: 0.42 },
       this.scene
     );
     root.position.copyFrom(spawnPt);
-    root.material = bodyMat;
-    root.isPickable = true;
-    root.metadata = { enemyId: id };
-    parts.push(root);
+    root.isVisible = false;
+    root.isPickable = false;
 
-    // 2. Heavy Hunched Spine & Shoulders (Forward pitched Quake Fiend posture)
-    const hunchSpine = MeshBuilder.CreateBox(
-      `enemyHunch_${id}`,
-      { width: 0.76, height: 0.65, depth: 0.68 },
-      this.scene
-    );
-    hunchSpine.parent = root;
-    hunchSpine.position.set(0, 0.32, 0.08);
-    hunchSpine.rotation.x = 0.26;
-    hunchSpine.material = bodyMat;
-    hunchSpine.isPickable = true;
-    hunchSpine.metadata = { enemyId: id };
-    parts.push(hunchSpine);
-
-    // 3. Crooked, Battered Iron Breastplate
+    // 2. Heavy Angular Torso (Upper Cuirass, Midsection Vertebrae, Pelvis)
+    // Upper Ribcage / Cuirass (faceted, aggressive forward hunch)
     const chestPlate = MeshBuilder.CreateBox(
       `enemyChest_${id}`,
-      { width: 0.82, height: 0.54, depth: 0.58 },
+      { width: 0.74, height: 0.48, depth: 0.54 },
       this.scene
     );
     chestPlate.parent = root;
-    chestPlate.position.set(0, 0.18, 0.12);
-    chestPlate.rotation.set(0.12, 0, -0.04);
+    chestPlate.position.set(0, 0.22, 0.1);
+    chestPlate.rotation.set(0.22, 0, -0.03);
     chestPlate.material = bodyMat;
     chestPlate.isPickable = true;
     chestPlate.metadata = { enemyId: id };
     parts.push(chestPlate);
 
-    // 4. Forward-Thrusting Sunken Skull Helm
+    // Narrower armored midsection / spine
+    const midSpine = MeshBuilder.CreateBox(
+      `enemyMidSpine_${id}`,
+      { width: 0.52, height: 0.26, depth: 0.38 },
+      this.scene
+    );
+    midSpine.parent = root;
+    midSpine.position.set(0, -0.06, 0.05);
+    midSpine.rotation.x = 0.1;
+    midSpine.material = bodyMat;
+    midSpine.isPickable = true;
+    midSpine.metadata = { enemyId: id };
+    parts.push(midSpine);
+
+    // Angular Armored Pelvis / Hip Girdle
+    const pelvis = MeshBuilder.CreateBox(
+      `enemyPelvis_${id}`,
+      { width: 0.62, height: 0.22, depth: 0.44 },
+      this.scene
+    );
+    pelvis.parent = root;
+    pelvis.position.set(0, -0.24, 0.02);
+    pelvis.material = bodyMat;
+    pelvis.isPickable = true;
+    pelvis.metadata = { enemyId: id };
+    parts.push(pelvis);
+
+    // 3. Segmented Brawny Legs with Heavy Iron Greaves & Pointed Sabatons (Boots)
+    // Left Leg
+    const thighL = MeshBuilder.CreateBox(
+      `enemyThighL_${id}`,
+      { width: 0.22, height: 0.38, depth: 0.26 },
+      this.scene
+    );
+    thighL.parent = root;
+    thighL.position.set(-0.2, -0.48, 0.04);
+    thighL.rotation.x = 0.12;
+    thighL.material = bodyMat;
+    thighL.isPickable = true;
+    thighL.metadata = { enemyId: id };
+    parts.push(thighL);
+
+    const shinL = MeshBuilder.CreateBox(
+      `enemyShinL_${id}`,
+      { width: 0.18, height: 0.42, depth: 0.22 },
+      this.scene
+    );
+    shinL.parent = root;
+    shinL.position.set(-0.2, -0.78, -0.02);
+    shinL.rotation.x = -0.14;
+    shinL.material = bodyMat;
+    shinL.isPickable = true;
+    shinL.metadata = { enemyId: id };
+    parts.push(shinL);
+
+    const sabatonL = MeshBuilder.CreateBox(
+      `enemySabatonL_${id}`,
+      { width: 0.2, height: 0.14, depth: 0.36 },
+      this.scene
+    );
+    sabatonL.parent = root;
+    sabatonL.position.set(-0.2, -0.96, 0.08);
+    sabatonL.material = bodyMat;
+    sabatonL.isPickable = true;
+    sabatonL.metadata = { enemyId: id };
+    parts.push(sabatonL);
+
+    // Right Leg (slightly offset combat stance)
+    const thighR = MeshBuilder.CreateBox(
+      `enemyThighR_${id}`,
+      { width: 0.22, height: 0.38, depth: 0.26 },
+      this.scene
+    );
+    thighR.parent = root;
+    thighR.position.set(0.2, -0.48, -0.02);
+    thighR.rotation.x = -0.08;
+    thighR.material = bodyMat;
+    thighR.isPickable = true;
+    thighR.metadata = { enemyId: id };
+    parts.push(thighR);
+
+    const shinR = MeshBuilder.CreateBox(
+      `enemyShinR_${id}`,
+      { width: 0.18, height: 0.42, depth: 0.22 },
+      this.scene
+    );
+    shinR.parent = root;
+    shinR.position.set(0.2, -0.78, 0.04);
+    shinR.rotation.x = 0.1;
+    shinR.material = bodyMat;
+    shinR.isPickable = true;
+    shinR.metadata = { enemyId: id };
+    parts.push(shinR);
+
+    const sabatonR = MeshBuilder.CreateBox(
+      `enemySabatonR_${id}`,
+      { width: 0.2, height: 0.14, depth: 0.36 },
+      this.scene
+    );
+    sabatonR.parent = root;
+    sabatonR.position.set(0.2, -0.96, 0.14);
+    sabatonR.material = bodyMat;
+    sabatonR.isPickable = true;
+    sabatonR.metadata = { enemyId: id };
+    parts.push(sabatonR);
+
+    // 4. Hunched Upper Back Mantle & Sunken Skull Helm
+    const hunchMantle = MeshBuilder.CreateBox(
+      `enemyHunch_${id}`,
+      { width: 0.72, height: 0.44, depth: 0.58 },
+      this.scene
+    );
+    hunchMantle.parent = root;
+    hunchMantle.position.set(0, 0.46, -0.02);
+    hunchMantle.rotation.x = 0.28;
+    hunchMantle.material = bodyMat;
+    hunchMantle.isPickable = true;
+    hunchMantle.metadata = { enemyId: id };
+    parts.push(hunchMantle);
+
     const skullHelm = MeshBuilder.CreateBox(
       `enemySkull_${id}`,
-      { width: 0.38, height: 0.4, depth: 0.46 },
+      { width: 0.36, height: 0.38, depth: 0.44 },
       this.scene
     );
     skullHelm.parent = root;
-    skullHelm.position.set(0, 0.68, 0.36);
-    skullHelm.rotation.x = 0.2;
+    skullHelm.position.set(0, 0.66, 0.24);
+    skullHelm.rotation.x = 0.22;
     skullHelm.material = bodyMat;
     skullHelm.isPickable = true;
     skullHelm.metadata = { enemyId: id };
     parts.push(skullHelm);
 
-    // 5. Asymmetrical Horns: Long curved left horn + broken shattered right stump
+    // Asymmetrical Horns: Long curved left horn + broken shattered right stump
     const hornLeft = MeshBuilder.CreateCylinder(
       `enemyHornL_${id}`,
-      { diameterTop: 0.02, diameterBottom: 0.12, height: 0.55, tessellation: 5 },
+      { diameterTop: 0.02, diameterBottom: 0.11, height: 0.54, tessellation: 5 },
       this.scene
     );
     hornLeft.parent = skullHelm;
-    hornLeft.position.set(-0.16, 0.26, 0.02);
+    hornLeft.position.set(-0.16, 0.24, 0.02);
     hornLeft.rotation.set(-0.45, 0.15, -0.38);
     hornLeft.material = hornMat;
     hornLeft.isPickable = true;
@@ -158,38 +262,38 @@ export class EnemyController {
 
     const hornRight = MeshBuilder.CreateCylinder(
       `enemyHornR_${id}`,
-      { diameterTop: 0.08, diameterBottom: 0.12, height: 0.18, tessellation: 5 },
+      { diameterTop: 0.08, diameterBottom: 0.11, height: 0.18, tessellation: 5 },
       this.scene
     );
     hornRight.parent = skullHelm;
-    hornRight.position.set(0.16, 0.16, 0.02);
+    hornRight.position.set(0.16, 0.15, 0.02);
     hornRight.rotation.set(-0.2, -0.1, 0.32);
     hornRight.material = hornMat;
     hornRight.isPickable = true;
     hornRight.metadata = { enemyId: id };
     parts.push(hornRight);
 
-    // 6. Glowing Demonic Eye Slits (Deep-set under skull brow)
+    // Glowing Demonic Eye Slits (Deep-set under skull brow)
     const eyeVisor = MeshBuilder.CreateBox(
       `enemyEyes_${id}`,
-      { width: 0.32, height: 0.08, depth: 0.16 },
+      { width: 0.3, height: 0.07, depth: 0.16 },
       this.scene
     );
     eyeVisor.parent = skullHelm;
-    eyeVisor.position.set(0, 0.02, 0.22);
+    eyeVisor.position.set(0, 0.01, 0.2);
     eyeVisor.material = visorMat;
     eyeVisor.isPickable = true;
     eyeVisor.metadata = { enemyId: id };
     parts.push(eyeVisor);
 
-    // 7. Asymmetrical Shoulders: Massive spiked left pauldron + dented right plate
+    // 5. Asymmetrical Shoulders: Spiked Left Pauldron + Dented Right Guard
     const pauldronLeft = MeshBuilder.CreateBox(
       `enemyPauldronL_${id}`,
-      { width: 0.38, height: 0.34, depth: 0.44 },
+      { width: 0.36, height: 0.32, depth: 0.42 },
       this.scene
     );
     pauldronLeft.parent = root;
-    pauldronLeft.position.set(-0.48, 0.44, 0.06);
+    pauldronLeft.position.set(-0.46, 0.42, 0.06);
     pauldronLeft.rotation.set(0.15, 0.05, -0.32);
     pauldronLeft.material = bodyMat;
     pauldronLeft.isPickable = true;
@@ -198,11 +302,11 @@ export class EnemyController {
 
     const spikeL1 = MeshBuilder.CreateCylinder(
       `enemySpikeL1_${id}`,
-      { diameterTop: 0.02, diameterBottom: 0.1, height: 0.38, tessellation: 5 },
+      { diameterTop: 0.02, diameterBottom: 0.09, height: 0.36, tessellation: 5 },
       this.scene
     );
     spikeL1.parent = pauldronLeft;
-    spikeL1.position.set(-0.08, 0.22, 0.06);
+    spikeL1.position.set(-0.08, 0.2, 0.06);
     spikeL1.rotation.set(0.1, 0, -0.35);
     spikeL1.material = hornMat;
     spikeL1.isPickable = true;
@@ -211,91 +315,107 @@ export class EnemyController {
 
     const pauldronRight = MeshBuilder.CreateBox(
       `enemyPauldronR_${id}`,
-      { width: 0.32, height: 0.28, depth: 0.38 },
+      { width: 0.3, height: 0.26, depth: 0.36 },
       this.scene
     );
     pauldronRight.parent = root;
-    pauldronRight.position.set(0.46, 0.4, 0.04);
+    pauldronRight.position.set(0.44, 0.38, 0.04);
     pauldronRight.rotation.set(0.1, -0.05, 0.24);
     pauldronRight.material = bodyMat;
     pauldronRight.isPickable = true;
     pauldronRight.metadata = { enemyId: id };
     parts.push(pauldronRight);
 
-    // 8. Reaching Clawed Forearms (bent forward aggressively)
-    const armLeft = MeshBuilder.CreateBox(
-      `enemyArmL_${id}`,
-      { width: 0.18, height: 0.18, depth: 0.54 },
+    // 6. Reaching Segmented Arms (Upper Arm + Forearm + Claws)
+    // Left Arm
+    const bicepL = MeshBuilder.CreateBox(
+      `enemyBicepL_${id}`,
+      { width: 0.18, height: 0.32, depth: 0.2 },
       this.scene
     );
-    armLeft.parent = root;
-    armLeft.position.set(-0.48, 0.16, 0.28);
-    armLeft.rotation.set(-0.42, 0.15, -0.05);
-    armLeft.material = bodyMat;
-    armLeft.isPickable = true;
-    armLeft.metadata = { enemyId: id };
-    parts.push(armLeft);
+    bicepL.parent = root;
+    bicepL.position.set(-0.45, 0.26, 0.08);
+    bicepL.rotation.set(0.24, 0, -0.18);
+    bicepL.material = bodyMat;
+    bicepL.isPickable = true;
+    bicepL.metadata = { enemyId: id };
+    parts.push(bicepL);
 
-    const clawsLeft = MeshBuilder.CreateCylinder(
+    const forearmL = MeshBuilder.CreateBox(
+      `enemyForearmL_${id}`,
+      { width: 0.19, height: 0.18, depth: 0.44 },
+      this.scene
+    );
+    forearmL.parent = root;
+    forearmL.position.set(-0.48, 0.08, 0.3);
+    forearmL.rotation.set(-0.42, 0.14, -0.05);
+    forearmL.material = bodyMat;
+    forearmL.isPickable = true;
+    forearmL.metadata = { enemyId: id };
+    parts.push(forearmL);
+
+    const clawsL = MeshBuilder.CreateCylinder(
       `enemyClawsL_${id}`,
-      { diameterTop: 0.01, diameterBottom: 0.08, height: 0.24, tessellation: 4 },
+      { diameterTop: 0.01, diameterBottom: 0.08, height: 0.22, tessellation: 4 },
       this.scene
     );
-    clawsLeft.parent = armLeft;
-    clawsLeft.position.set(0, 0, 0.32);
-    clawsLeft.rotation.x = Math.PI / 2;
-    clawsLeft.material = hornMat;
-    clawsLeft.isPickable = true;
-    clawsLeft.metadata = { enemyId: id };
-    parts.push(clawsLeft);
+    clawsL.parent = forearmL;
+    clawsL.position.set(0, 0, 0.26);
+    clawsL.rotation.x = Math.PI / 2;
+    clawsL.material = hornMat;
+    clawsL.isPickable = true;
+    clawsL.metadata = { enemyId: id };
+    parts.push(clawsL);
 
-    const armRight = MeshBuilder.CreateBox(
-      `enemyArmR_${id}`,
-      { width: 0.18, height: 0.18, depth: 0.54 },
+    // Right Arm
+    const bicepR = MeshBuilder.CreateBox(
+      `enemyBicepR_${id}`,
+      { width: 0.18, height: 0.32, depth: 0.2 },
       this.scene
     );
-    armRight.parent = root;
-    armRight.position.set(0.48, 0.12, 0.24);
-    armRight.rotation.set(-0.35, -0.12, 0.05);
-    armRight.material = bodyMat;
-    armRight.isPickable = true;
-    armRight.metadata = { enemyId: id };
-    parts.push(armRight);
+    bicepR.parent = root;
+    bicepR.position.set(0.44, 0.24, 0.06);
+    bicepR.rotation.set(0.18, 0, 0.16);
+    bicepR.material = bodyMat;
+    bicepR.isPickable = true;
+    bicepR.metadata = { enemyId: id };
+    parts.push(bicepR);
 
-    const clawsRight = MeshBuilder.CreateCylinder(
+    const forearmR = MeshBuilder.CreateBox(
+      `enemyForearmR_${id}`,
+      { width: 0.19, height: 0.18, depth: 0.44 },
+      this.scene
+    );
+    forearmR.parent = root;
+    forearmR.position.set(0.46, 0.06, 0.26);
+    forearmR.rotation.set(-0.35, -0.12, 0.05);
+    forearmR.material = bodyMat;
+    forearmR.isPickable = true;
+    forearmR.metadata = { enemyId: id };
+    parts.push(forearmR);
+
+    const clawsR = MeshBuilder.CreateCylinder(
       `enemyClawsR_${id}`,
-      { diameterTop: 0.01, diameterBottom: 0.08, height: 0.24, tessellation: 4 },
+      { diameterTop: 0.01, diameterBottom: 0.08, height: 0.22, tessellation: 4 },
       this.scene
     );
-    clawsRight.parent = armRight;
-    clawsRight.position.set(0, 0, 0.32);
-    clawsRight.rotation.x = Math.PI / 2;
-    clawsRight.material = hornMat;
-    clawsRight.isPickable = true;
-    clawsRight.metadata = { enemyId: id };
-    parts.push(clawsRight);
+    clawsR.parent = forearmR;
+    clawsR.position.set(0, 0, 0.26);
+    clawsR.rotation.x = Math.PI / 2;
+    clawsR.material = hornMat;
+    clawsR.isPickable = true;
+    clawsR.metadata = { enemyId: id };
+    parts.push(clawsR);
 
-    // 9. Ragged Iron Loin/Waist Tassets
-    const waistPlate = MeshBuilder.CreateBox(
-      `enemyWaist_${id}`,
-      { width: 0.58, height: 0.44, depth: 0.14 },
-      this.scene
-    );
-    waistPlate.parent = root;
-    waistPlate.position.set(0, -0.24, 0.22);
-    waistPlate.rotation.x = -0.14;
-    waistPlate.material = bodyMat;
-    waistPlate.isPickable = true;
-    waistPlate.metadata = { enemyId: id };
-    parts.push(waistPlate);
-
-    // Shadows
-    this.shadowGenerator.addShadowCaster(root);
-    this.shadowGenerator.addShadowCaster(hunchSpine);
+    // 7. Dynamic Shadows
     this.shadowGenerator.addShadowCaster(chestPlate);
+    this.shadowGenerator.addShadowCaster(hunchMantle);
+    this.shadowGenerator.addShadowCaster(thighL);
+    this.shadowGenerator.addShadowCaster(thighR);
     this.shadowGenerator.addShadowCaster(pauldronLeft);
     this.shadowGenerator.addShadowCaster(pauldronRight);
 
+    // Dynamic Physics Capsule (Kept as invisible collision proxy)
     const aggregate = new PhysicsAggregate(
       root,
       PhysicsShapeType.CAPSULE,
