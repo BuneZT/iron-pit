@@ -26,6 +26,7 @@ export interface EnemyInstance {
   despawnTimer: number;
   jumpCooldown: number;
   stuckTimer: number;
+  groanTimer: number;
   prevPosition: Vector3;
 }
 
@@ -43,6 +44,8 @@ export class EnemyController {
   private readonly baseMoveSpeed = 4.6;
   private readonly contactDistance = 1.45;
   private readonly contactDamage = 15;
+
+  public onEnemyGroan?: (pos: Vector3) => void;
 
   private readonly tmpToPlayer = Vector3.Zero();
   private readonly tmpHorizontalVec = Vector3.Zero();
@@ -455,6 +458,7 @@ export class EnemyController {
       despawnTimer: 0,
       jumpCooldown: 0.8 + Math.random() * 0.4,
       stuckTimer: 0,
+      groanTimer: 2.0 + Math.random() * 4.5,
       prevPosition: spawnPt.clone(),
     };
 
@@ -559,6 +563,12 @@ export class EnemyController {
       }
 
       // Alive enemy logic
+      enemy.groanTimer -= dt;
+      if (enemy.groanTimer <= 0) {
+        enemy.groanTimer = 4.5 + Math.random() * 6.0;
+        this.onEnemyGroan?.(enemy.root.position);
+      }
+
       if (enemy.staggerTimer > 0) {
         enemy.staggerTimer -= dt;
         continue;

@@ -27,6 +27,9 @@ export class PlayerController {
 
   private readonly moveDir = Vector3.Zero();
   private readonly displacement = Vector3.Zero();
+  private footstepTimer = 0;
+
+  public onFootstep?: () => void;
 
   constructor(scene: Scene) {
     Collider.DoubleSidedCheck = true;
@@ -165,6 +168,17 @@ export class PlayerController {
       Math.min(19.2, this.collider.position.z)
     );
 
+    // Footstep cadence when moving and grounded
+    if (this.isGrounded && this.moveDir.lengthSquared() > 0.001) {
+      this.footstepTimer -= dt;
+      if (this.footstepTimer <= 0) {
+        this.footstepTimer = isSprinting ? 0.32 : 0.44;
+        this.onFootstep?.();
+      }
+    } else {
+      this.footstepTimer = Math.min(this.footstepTimer, 0.1);
+    }
+
     // Sync camera transform
     this.camera.position.set(
       this.collider.position.x,
@@ -185,6 +199,7 @@ export class PlayerController {
     this.recoilPitchOffset = 0;
     this.verticalVelocity = 0;
     this.isGrounded = true;
+    this.footstepTimer = 0;
     this.keys.clear();
     this.camera.position.set(0, 1.58, 0);
     this.camera.rotation.set(0, 0, 0);

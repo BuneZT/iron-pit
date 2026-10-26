@@ -1,4 +1,5 @@
 import { Engine, PointLight, Scene } from '@babylonjs/core';
+import { AudioSettings } from './core/AudioSettings';
 import { GameState } from './core/GameState';
 import { HealthState } from './core/HealthState';
 import { WaveManager } from './core/WaveManager';
@@ -29,7 +30,7 @@ export class GameApp {
     waveBreatherDuration: 3.0,
   });
 
-  private readonly audio = new AudioManager();
+  private readonly audio: AudioManager;
   private hud!: HUDController;
   private player!: PlayerController;
   private weaponController!: WeaponController;
@@ -44,6 +45,15 @@ export class GameApp {
       stencil: true,
     });
     this.scene = new Scene(this.engine);
+
+    const savedAudio =
+      typeof localStorage !== 'undefined'
+        ? localStorage.getItem('iron_pit_audio_settings')
+        : null;
+    const settings = savedAudio
+      ? AudioSettings.deserialize(savedAudio)
+      : new AudioSettings();
+    this.audio = new AudioManager(settings);
   }
 
   async init(): Promise<void> {
@@ -62,6 +72,17 @@ export class GameApp {
       arena.spawnPoints,
       arena.shadowGenerator
     );
+
+    this.player.onFootstep = () => {
+      this.audio.play('footstep');
+    };
+    this.enemyController.onEnemyGroan = (pos) => {
+      this.audio.playDistanceAttenuated(
+        'enemy_groan',
+        pos,
+        this.player.position
+      );
+    };
 
     this.hud = new HUDController(() => {
       this.handleModalAction();
@@ -93,6 +114,8 @@ export class GameApp {
       this.startNewMatch();
     } else if (status === 'PAUSED') {
       this.gameState.resumeMatch();
+      this.audio.resumeMusic();
+      this.audio.duckMusic(false);
       this.syncHUD();
     }
     this.requestPointerLockSafe();
@@ -106,6 +129,9 @@ export class GameApp {
     this.waveManager.reset();
     this.waveManager.startFirstWave();
     this.gameState.startMatch();
+    this.audio.startMusic();
+    this.audio.duckMusic(false);
+    this.audio.play('wave_bell');
     this.syncHUD();
   }
 
@@ -138,6 +164,7 @@ export class GameApp {
         this.gameState.status === 'PLAYING'
       ) {
         this.gameState.pauseMatch();
+        this.audio.duckMusic(true);
         this.syncHUD();
       }
     });
@@ -211,7 +238,11 @@ export class GameApp {
     this.weaponState.update(dt);
     this.weaponController.update(dt, this.weaponState.isReloading);
 
+    const prevWave = this.waveManager.currentWave;
     const toSpawn = this.waveManager.update(dt);
+    if (this.waveManager.currentWave > prevWave) {
+      this.audio.play('wave_bell');
+    }
     for (let i = 0; i < toSpawn; i++) {
       this.enemyController.spawnEnemy(this.waveManager.currentWave);
     }
@@ -228,6 +259,7 @@ export class GameApp {
 
       if (!this.healthState.isAlive) {
         this.gameState.triggerGameOver();
+        this.audio.duckMusic(true);
         if (document.pointerLockElement && document.exitPointerLock) {
           document.exitPointerLock();
         }
