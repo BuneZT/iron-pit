@@ -3,6 +3,7 @@ export interface WeaponConfig {
   fireCooldown: number;
   reloadDuration: number;
   damage: number;
+  autoReloadOnEmpty?: boolean;
 }
 
 export type FireResult = 'FIRED' | 'COOLDOWN' | 'EMPTY' | 'RELOADING';
@@ -20,9 +21,13 @@ export class WeaponState {
       fireCooldown: 0.25,
       reloadDuration: 1.2,
       damage: 35,
+      autoReloadOnEmpty: true,
     }
   ) {
-    this.config = config;
+    this.config = {
+      ...config,
+      autoReloadOnEmpty: config.autoReloadOnEmpty ?? true,
+    };
     this._ammo = config.magazineSize;
   }
 
@@ -51,6 +56,9 @@ export class WeaponState {
       return 'RELOADING';
     }
     if (this._ammo <= 0) {
+      if (this.config.autoReloadOnEmpty) {
+        this.startReload();
+      }
       return 'EMPTY';
     }
     if (this._cooldownTimer > 0) {

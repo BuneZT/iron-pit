@@ -147,6 +147,8 @@ export class GameApp {
     const fireOutcome = this.weaponState.tryFire();
     if (fireOutcome === 'EMPTY') {
       this.audio.play('dryfire');
+      this.audio.play('reload');
+      this.syncHUD();
       return;
     }
     if (fireOutcome !== 'FIRED') {

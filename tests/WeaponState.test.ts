@@ -67,4 +67,41 @@ describe('WeaponState', () => {
     expect(weapon.startReload()).toBe(true);
     expect(weapon.startReload()).toBe(false);
   });
+
+  it('automatically starts reload on dryfire when autoReloadOnEmpty is true (default)', () => {
+    for (let i = 0; i < 12; i++) {
+      expect(weapon.tryFire()).toBe('FIRED');
+      weapon.update(0.25);
+    }
+    expect(weapon.ammo).toBe(0);
+    expect(weapon.isReloading).toBe(false);
+
+    // Dryfire click triggers reload
+    expect(weapon.tryFire()).toBe('EMPTY');
+    expect(weapon.isReloading).toBe(true);
+    expect(weapon.tryFire()).toBe('RELOADING');
+
+    weapon.update(1.2);
+    expect(weapon.isReloading).toBe(false);
+    expect(weapon.ammo).toBe(12);
+  });
+
+  it('does not auto reload on dryfire when autoReloadOnEmpty is explicitly false', () => {
+    const manualWeapon = new WeaponState({
+      magazineSize: 6,
+      fireCooldown: 0.2,
+      reloadDuration: 1.0,
+      damage: 30,
+      autoReloadOnEmpty: false,
+    });
+
+    for (let i = 0; i < 6; i++) {
+      manualWeapon.tryFire();
+      manualWeapon.update(0.2);
+    }
+    expect(manualWeapon.ammo).toBe(0);
+
+    expect(manualWeapon.tryFire()).toBe('EMPTY');
+    expect(manualWeapon.isReloading).toBe(false);
+  });
 });
