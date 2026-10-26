@@ -24,6 +24,9 @@ export interface EnemyInstance {
   staggerTimer: number;
   flashTimer: number;
   despawnTimer: number;
+  jumpCooldown: number;
+  stuckTimer: number;
+  prevPosition: Vector3;
 }
 
 export type EnemyHitOutcome = 'NONE' | 'HIT' | 'KILLED';
@@ -40,6 +43,13 @@ export class EnemyController {
   private readonly baseMoveSpeed = 4.6;
   private readonly contactDistance = 1.45;
   private readonly contactDamage = 15;
+
+  private readonly tmpToPlayer = Vector3.Zero();
+  private readonly tmpHorizontalVec = Vector3.Zero();
+  private readonly tmpMoveDir = Vector3.Zero();
+  private readonly tmpNewVel = Vector3.Zero();
+  private readonly tmpJumpImpulse = Vector3.Zero();
+  private readonly tmpTargetRot = Quaternion.Identity();
 
   constructor(
     scene: Scene,
@@ -442,6 +452,9 @@ export class EnemyController {
       staggerTimer: 0,
       flashTimer: 0,
       despawnTimer: 0,
+      jumpCooldown: 0.8 + Math.random() * 0.4,
+      stuckTimer: 0,
+      prevPosition: spawnPt.clone(),
     };
 
     this.enemies.set(id, instance);
@@ -470,6 +483,7 @@ export class EnemyController {
     if (enemy.hp > 0) {
       // Non-lethal hit: physical stagger impulse + bright hit flash
       enemy.staggerTimer = 0.26;
+      enemy.stuckTimer = 0;
       enemy.flashTimer = 0.11;
       enemy.bodyMat.emissiveColor = new Color3(0.85, 0.85, 0.85);
 
@@ -549,30 +563,122 @@ export class EnemyController {
         continue;
       }
 
-      const toPlayer = playerPosition.subtract(enemy.root.position);
-      const horizontalVec = new Vector3(toPlayer.x, 0, toPlayer.z);
-      const dist = horizontalVec.length();
+      if (enemy.jumpCooldown > 0) {
+        enemy.jumpCooldown -= dt;
+      }
 
-      if (dist <= this.contactDistance) {
+      // Calculate actual linear distance traveled since previous frame
+      const actualDist = Vector3.Distance(
+        enemy.root.position,
+        enemy.prevPosition
+      );
+      enemy.prevPosition.copyFrom(enemy.root.position);
+
+      playerPosition.subtractToRef(enemy.root.position, this.tmpToPlayer);
+      const verticalDiff = playerPosition.y - enemy.root.position.y;
+      this.tmpHorizontalVec.set(this.tmpToPlayer.x, 0, this.tmpToPlayer.z);
+      const horizontalDist = this.tmpHorizontalVec.length();
+
+      // 3D contact damage validation
+      if (
+        horizontalDist <= this.contactDistance &&
+        Math.abs(verticalDiff) <= 1.4
+      ) {
         contactDamageTriggered = Math.max(
           contactDamageTriggered,
           this.contactDamage
         );
       }
 
-      if (dist > 0.9) {
-        const dir = horizontalVec.scale(1 / dist);
-        const currentVel = enemy.aggregate.body.getLinearVelocity();
-        enemy.aggregate.body.setLinearVelocity(
-          new Vector3(dir.x * chaseSpeed, currentVel.y, dir.z * chaseSpeed)
+      if (horizontalDist > 0.0001) {
+        this.tmpMoveDir.set(
+          this.tmpHorizontalVec.x / horizontalDist,
+          0,
+          this.tmpHorizontalVec.z / horizontalDist
         );
+      } else {
+        this.tmpMoveDir.set(0, 0, 1);
+      }
+
+      if (horizontalDist > 0.9) {
+        const expectedDist = chaseSpeed * dt;
+        if (actualDist < expectedDist * 0.45) {
+          enemy.stuckTimer += dt;
+        } else {
+          enemy.stuckTimer = 0;
+        }
+
+        const currentVel = enemy.aggregate.body.getLinearVelocity();
+        const isGrounded = Math.abs(currentVel.y) < 0.8;
+        let didJump = false;
+
+        if (enemy.jumpCooldown <= 0 && isGrounded) {
+          if (verticalDiff > 0.6 && horizontalDist <= 5.2) {
+            // Case A: Vertical Pursuit Leap (player is perched above)
+            const mass = 1.5;
+            const jumpSpeedY = 8.2;
+            const forwardPush = 6.0;
+            this.tmpJumpImpulse.set(
+              this.tmpMoveDir.x * forwardPush * mass,
+              jumpSpeedY * mass,
+              this.tmpMoveDir.z * forwardPush * mass
+            );
+            enemy.aggregate.body.applyImpulse(
+              this.tmpJumpImpulse,
+              enemy.root.position
+            );
+            enemy.jumpCooldown = 1.6;
+            enemy.stuckTimer = 0;
+            didJump = true;
+          } else if (enemy.stuckTimer >= 0.28 && horizontalDist > 1.2) {
+            // Case B: Obstacle Vault Leap (enemy is blocked while chasing)
+            const mass = 1.5;
+            const jumpSpeedY = 6.8;
+            const forwardPush = 5.0;
+            this.tmpJumpImpulse.set(
+              this.tmpMoveDir.x * forwardPush * mass,
+              jumpSpeedY * mass,
+              this.tmpMoveDir.z * forwardPush * mass
+            );
+            enemy.aggregate.body.applyImpulse(
+              this.tmpJumpImpulse,
+              enemy.root.position
+            );
+            enemy.jumpCooldown = 1.4;
+            enemy.stuckTimer = 0;
+            didJump = true;
+          }
+        }
+
+        if (!didJump) {
+          this.tmpNewVel.set(
+            this.tmpMoveDir.x * chaseSpeed,
+            currentVel.y,
+            this.tmpMoveDir.z * chaseSpeed
+          );
+          enemy.aggregate.body.setLinearVelocity(this.tmpNewVel);
+        }
 
         // Face the player smoothly around Y axis
-        const targetYaw = Math.atan2(dir.x, dir.z);
-        enemy.root.rotationQuaternion = Quaternion.FromEulerAngles(
-          0,
-          targetYaw,
-          0
+        const targetYaw = Math.atan2(this.tmpMoveDir.x, this.tmpMoveDir.z);
+        Quaternion.FromEulerAnglesToRef(0, targetYaw, 0, this.tmpTargetRot);
+        enemy.root.rotationQuaternion = this.tmpTargetRot;
+      } else {
+        enemy.stuckTimer = 0;
+      }
+
+      // Clamp within arena bounds to prevent physics tunneling
+      if (
+        Math.abs(enemy.root.position.x) > 19.2 ||
+        Math.abs(enemy.root.position.z) > 19.2
+      ) {
+        enemy.root.position.x = Math.max(
+          -19.2,
+          Math.min(19.2, enemy.root.position.x)
+        );
+        enemy.root.position.z = Math.max(
+          -19.2,
+          Math.min(19.2, enemy.root.position.z)
         );
       }
     }
