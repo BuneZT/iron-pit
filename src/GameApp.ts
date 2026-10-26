@@ -1,4 +1,4 @@
-import { Engine, Scene } from '@babylonjs/core';
+import { Engine, PointLight, Scene } from '@babylonjs/core';
 import { GameState } from './core/GameState';
 import { HealthState } from './core/HealthState';
 import { WaveManager } from './core/WaveManager';
@@ -34,6 +34,8 @@ export class GameApp {
   private player!: PlayerController;
   private weaponController!: WeaponController;
   private enemyController!: EnemyController;
+  private brazierLights: PointLight[] = [];
+  private totalTime = 0;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -49,6 +51,7 @@ export class GameApp {
     await initializeScenePhysics(this.scene);
 
     const arena = ArenaBuilder.build(this.scene);
+    this.brazierLights = arena.brazierLights;
     this.player = new PlayerController(this.scene);
     this.weaponController = new WeaponController(
       this.scene,
@@ -70,6 +73,8 @@ export class GameApp {
     this.scene.onBeforeRenderObservable.add(() => {
       const rawDt = this.engine.getDeltaTime() / 1000;
       const dt = Math.min(rawDt, 0.1);
+      this.totalTime += dt;
+      this.updateBraziers(this.totalTime);
       this.update(dt);
     });
 
@@ -175,6 +180,17 @@ export class GameApp {
 
     this.hud.pulseCrosshair(hitEnemy);
     this.syncHUD();
+  }
+
+  private updateBraziers(time: number): void {
+    for (let i = 0; i < this.brazierLights.length; i++) {
+      const light = this.brazierLights[i];
+      const offset = i * 1.7;
+      light.intensity =
+        0.76 +
+        0.14 * Math.sin((time + offset) * 7.5) +
+        0.06 * Math.cos((time + offset) * 17.3);
+    }
   }
 
   private update(dt: number): void {
