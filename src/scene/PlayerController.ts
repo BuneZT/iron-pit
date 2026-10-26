@@ -1,4 +1,5 @@
 import {
+  Collider,
   Mesh,
   MeshBuilder,
   Scene,
@@ -24,7 +25,12 @@ export class PlayerController {
   private readonly mouseSensitivity = 0.0022;
   private readonly maxPitch = (82 * Math.PI) / 180;
 
+  private readonly moveDir = Vector3.Zero();
+  private readonly displacement = Vector3.Zero();
+
   constructor(scene: Scene) {
+    Collider.DoubleSidedCheck = true;
+
     this.collider = MeshBuilder.CreateCylinder(
       'playerCollider',
       { diameter: 0.9, height: 1.8 },
@@ -52,6 +58,9 @@ export class PlayerController {
 
   private bindEvents(): void {
     window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+      }
       this.keys.add(e.code);
     });
 
@@ -100,14 +109,15 @@ export class PlayerController {
     if (this.keys.has('KeyD') || this.keys.has('ArrowRight')) rightInput += 1;
     if (this.keys.has('KeyA') || this.keys.has('ArrowLeft')) rightInput -= 1;
 
-    const forwardDir = new Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw));
-    const rightDir = new Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
-
-    const moveDir = forwardDir
-      .scale(forwardInput)
-      .add(rightDir.scale(rightInput));
-    if (moveDir.lengthSquared() > 0.0001) {
-      moveDir.normalize();
+    const sinYaw = Math.sin(this.yaw);
+    const cosYaw = Math.cos(this.yaw);
+    this.moveDir.set(
+      sinYaw * forwardInput + cosYaw * rightInput,
+      0,
+      cosYaw * forwardInput - sinYaw * rightInput
+    );
+    if (this.moveDir.lengthSquared() > 0.0001) {
+      this.moveDir.normalize();
     }
 
     const isSprinting =
@@ -122,17 +132,17 @@ export class PlayerController {
 
     this.verticalVelocity += this.gravity * dt;
 
-    const displacement = new Vector3(
-      moveDir.x * speed * dt,
+    this.displacement.set(
+      this.moveDir.x * speed * dt,
       this.verticalVelocity * dt,
-      moveDir.z * speed * dt
+      this.moveDir.z * speed * dt
     );
 
     const prevY = this.collider.position.y;
-    this.collider.moveWithCollisions(displacement);
+    this.collider.moveWithCollisions(this.displacement);
 
-    // Floor clamp / grounded check
-    if (this.collider.position.y <= 0.91) {
+    // Floor clamp / grounded check (only clamp downward/resting velocity)
+    if (this.verticalVelocity <= 0 && this.collider.position.y <= 0.91) {
       this.collider.position.y = 0.9;
       this.verticalVelocity = 0;
       this.isGrounded = true;

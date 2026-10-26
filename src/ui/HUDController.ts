@@ -38,6 +38,7 @@ export class HUDController {
 
   constructor(onActionButtonClick: () => void) {
     this.actionButton.addEventListener('click', () => {
+      this.actionButton.blur();
       onActionButtonClick();
     });
   }
