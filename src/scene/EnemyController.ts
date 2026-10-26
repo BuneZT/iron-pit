@@ -61,14 +61,20 @@ export class EnemyController {
     spawnPt.x += (Math.random() - 0.5) * 1.2;
     spawnPt.z += (Math.random() - 0.5) * 1.2;
 
-    // Dark rusted iron armor material
+    // Dark rusted iron armor material with nearest point sampling
     const bodyMat = new StandardMaterial(`enemyBodyMat_${id}`, this.scene);
-    const ironTex = new Texture('/assets/textures/rusted_iron.png', this.scene);
+    const ironTex = new Texture(
+      '/assets/textures/rusted_iron.png',
+      this.scene,
+      false,
+      true,
+      Texture.NEAREST_SAMPLINGMODE
+    );
     ironTex.uScale = 1;
     ironTex.vScale = 1;
     bodyMat.diffuseTexture = ironTex;
-    bodyMat.diffuseColor = new Color3(0.55, 0.52, 0.52);
-    bodyMat.specularColor = new Color3(0.3, 0.28, 0.25);
+    bodyMat.diffuseColor = new Color3(0.65, 0.6, 0.6);
+    bodyMat.specularColor = new Color3(0.15, 0.14, 0.12);
 
     // Glowing demonic amber/crimson eye visor
     const visorMat = new StandardMaterial(`enemyVisorMat_${id}`, this.scene);

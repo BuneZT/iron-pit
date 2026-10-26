@@ -42,14 +42,20 @@ export class WeaponController {
     this.gunRig.parent = camera;
     this.gunRig.position.copyFrom(this.restPosition);
 
-    // Gothic Materials
+    // Gothic Materials (Nearest point-sampled for authentic retro pixel grit)
     const darkIronMat = new StandardMaterial('gunIronMat', scene);
-    const ironTex = new Texture('/assets/textures/rusted_iron.png', scene);
+    const ironTex = new Texture(
+      '/assets/textures/rusted_iron.png',
+      scene,
+      false,
+      true,
+      Texture.NEAREST_SAMPLINGMODE
+    );
     ironTex.uScale = 1;
     ironTex.vScale = 1;
     darkIronMat.diffuseTexture = ironTex;
-    darkIronMat.diffuseColor = new Color3(0.6, 0.6, 0.6);
-    darkIronMat.specularColor = new Color3(0.35, 0.35, 0.38);
+    darkIronMat.diffuseColor = new Color3(0.7, 0.68, 0.68);
+    darkIronMat.specularColor = new Color3(0.2, 0.2, 0.22);
 
     const agedWoodMat = new StandardMaterial('gunWoodMat', scene);
     agedWoodMat.diffuseColor = new Color3(0.24, 0.16, 0.1);

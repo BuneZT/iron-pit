@@ -54,34 +54,58 @@ export class ArenaBuilder {
     shadowGenerator.useBlurExponentialShadowMap = true;
     shadowGenerator.blurKernel = 16;
 
-    // 2. Static Retro Textures & Materials
-    const floorTexture = new Texture('/assets/textures/stone_floor.png', scene);
-    floorTexture.uScale = 10;
-    floorTexture.vScale = 10;
+    // 2. Static Retro Textures & Materials (Nearest-neighbor point sampling for gritty Quake/PS1 pixel crunch)
+    const floorTexture = new Texture(
+      '/assets/textures/stone_floor.png',
+      scene,
+      false,
+      true,
+      Texture.NEAREST_SAMPLINGMODE
+    );
+    floorTexture.uScale = 16;
+    floorTexture.vScale = 16;
     const floorMat = new StandardMaterial('retroFloorMat', scene);
     floorMat.diffuseTexture = floorTexture;
-    floorMat.specularColor = new Color3(0.06, 0.06, 0.08);
+    floorMat.specularColor = new Color3(0.01, 0.01, 0.01);
 
-    const wallTexture = new Texture('/assets/textures/dungeon_wall.png', scene);
-    wallTexture.uScale = 4;
-    wallTexture.vScale = 1.5;
+    const wallTexture = new Texture(
+      '/assets/textures/dungeon_wall.png',
+      scene,
+      false,
+      true,
+      Texture.NEAREST_SAMPLINGMODE
+    );
+    wallTexture.uScale = 8;
+    wallTexture.vScale = 2.5;
     const wallMat = new StandardMaterial('retroWallMat', scene);
     wallMat.diffuseTexture = wallTexture;
-    wallMat.specularColor = new Color3(0.08, 0.08, 0.08);
+    wallMat.specularColor = new Color3(0.01, 0.01, 0.01);
 
-    const cryptTexture = new Texture('/assets/textures/crypt_stone.png', scene);
-    cryptTexture.uScale = 2;
-    cryptTexture.vScale = 2;
+    const cryptTexture = new Texture(
+      '/assets/textures/crypt_stone.png',
+      scene,
+      false,
+      true,
+      Texture.NEAREST_SAMPLINGMODE
+    );
+    cryptTexture.uScale = 3;
+    cryptTexture.vScale = 3;
     const cryptMat = new StandardMaterial('retroCryptMat', scene);
     cryptMat.diffuseTexture = cryptTexture;
-    cryptMat.specularColor = new Color3(0.05, 0.05, 0.06);
+    cryptMat.specularColor = new Color3(0.01, 0.01, 0.01);
 
-    const ironTexture = new Texture('/assets/textures/rusted_iron.png', scene);
-    ironTexture.uScale = 1;
-    ironTexture.vScale = 1;
+    const ironTexture = new Texture(
+      '/assets/textures/rusted_iron.png',
+      scene,
+      false,
+      true,
+      Texture.NEAREST_SAMPLINGMODE
+    );
+    ironTexture.uScale = 2;
+    ironTexture.vScale = 2;
     const ironMat = new StandardMaterial('retroIronMat', scene);
     ironMat.diffuseTexture = ironTexture;
-    ironMat.specularColor = new Color3(0.25, 0.22, 0.2);
+    ironMat.specularColor = new Color3(0.12, 0.1, 0.08);
 
     const emberMat = new StandardMaterial('brazierEmberMat', scene);
     emberMat.diffuseColor = new Color3(1.0, 0.55, 0.1);
