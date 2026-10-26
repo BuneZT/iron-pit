@@ -8,6 +8,7 @@ import {
   Scene,
   ShadowGenerator,
   StandardMaterial,
+  Texture,
   Vector3,
 } from '@babylonjs/core';
 
@@ -60,14 +61,23 @@ export class EnemyController {
     spawnPt.x += (Math.random() - 0.5) * 1.2;
     spawnPt.z += (Math.random() - 0.5) * 1.2;
 
+    // Dark rusted iron armor material
     const bodyMat = new StandardMaterial(`enemyBodyMat_${id}`, this.scene);
-    bodyMat.diffuseColor = new Color3(0.75, 0.2, 0.18);
-    bodyMat.specularColor = new Color3(0.3, 0.3, 0.3);
+    const ironTex = new Texture('/assets/textures/rusted_iron.png', this.scene);
+    ironTex.uScale = 1;
+    ironTex.vScale = 1;
+    bodyMat.diffuseTexture = ironTex;
+    bodyMat.diffuseColor = new Color3(0.55, 0.52, 0.52);
+    bodyMat.specularColor = new Color3(0.3, 0.28, 0.25);
 
+    // Glowing demonic amber/crimson eye visor
     const visorMat = new StandardMaterial(`enemyVisorMat_${id}`, this.scene);
-    visorMat.diffuseColor = new Color3(1.0, 0.85, 0.2);
-    visorMat.emissiveColor = new Color3(0.9, 0.55, 0.1);
+    visorMat.diffuseColor = new Color3(1.0, 0.22, 0.05);
+    visorMat.emissiveColor = new Color3(1.0, 0.28, 0.06);
 
+    const parts: Mesh[] = [];
+
+    // 1. Root Capsule Body
     const root = MeshBuilder.CreateCapsule(
       `enemyRoot_${id}`,
       { height: 1.8, radius: 0.42 },
@@ -77,33 +87,105 @@ export class EnemyController {
     root.material = bodyMat;
     root.isPickable = true;
     root.metadata = { enemyId: id };
+    parts.push(root);
 
-    // Chest armor block
+    // 2. Heavy Angular Iron Cuirass (Breastplate)
     const chest = MeshBuilder.CreateBox(
       `enemyChest_${id}`,
-      { width: 0.72, height: 0.55, depth: 0.52 },
+      { width: 0.78, height: 0.62, depth: 0.56 },
       this.scene
     );
     chest.parent = root;
-    chest.position.set(0, 0.18, 0.06);
+    chest.position.set(0, 0.16, 0.06);
     chest.material = bodyMat;
     chest.isPickable = true;
     chest.metadata = { enemyId: id };
+    parts.push(chest);
 
-    // Glowing Visor on front of head
+    // 3. Spiked Left Shoulder Pauldron
+    const pauldronLeft = MeshBuilder.CreateBox(
+      `enemyPauldronL_${id}`,
+      { width: 0.28, height: 0.28, depth: 0.36 },
+      this.scene
+    );
+    pauldronLeft.parent = root;
+    pauldronLeft.position.set(-0.46, 0.42, 0);
+    pauldronLeft.rotation.z = -0.28;
+    pauldronLeft.material = bodyMat;
+    pauldronLeft.isPickable = true;
+    pauldronLeft.metadata = { enemyId: id };
+    parts.push(pauldronLeft);
+
+    const spikeL = MeshBuilder.CreateCylinder(
+      `enemySpikeL_${id}`,
+      { diameterTop: 0.02, diameterBottom: 0.1, height: 0.32, tessellation: 6 },
+      this.scene
+    );
+    spikeL.parent = pauldronLeft;
+    spikeL.position.set(-0.06, 0.2, 0);
+    spikeL.rotation.z = -0.25;
+    spikeL.material = bodyMat;
+    spikeL.isPickable = true;
+    spikeL.metadata = { enemyId: id };
+    parts.push(spikeL);
+
+    // 4. Spiked Right Shoulder Pauldron
+    const pauldronRight = MeshBuilder.CreateBox(
+      `enemyPauldronR_${id}`,
+      { width: 0.28, height: 0.28, depth: 0.36 },
+      this.scene
+    );
+    pauldronRight.parent = root;
+    pauldronRight.position.set(0.46, 0.42, 0);
+    pauldronRight.rotation.z = 0.28;
+    pauldronRight.material = bodyMat;
+    pauldronRight.isPickable = true;
+    pauldronRight.metadata = { enemyId: id };
+    parts.push(pauldronRight);
+
+    const spikeR = MeshBuilder.CreateCylinder(
+      `enemySpikeR_${id}`,
+      { diameterTop: 0.02, diameterBottom: 0.1, height: 0.32, tessellation: 6 },
+      this.scene
+    );
+    spikeR.parent = pauldronRight;
+    spikeR.position.set(0.06, 0.2, 0);
+    spikeR.rotation.z = 0.25;
+    spikeR.material = bodyMat;
+    spikeR.isPickable = true;
+    spikeR.metadata = { enemyId: id };
+    parts.push(spikeR);
+
+    // 5. Demonic Helm Ridge / Crest
+    const helmRidge = MeshBuilder.CreateBox(
+      `enemyHelmRidge_${id}`,
+      { width: 0.1, height: 0.2, depth: 0.38 },
+      this.scene
+    );
+    helmRidge.parent = root;
+    helmRidge.position.set(0, 0.86, 0);
+    helmRidge.material = bodyMat;
+    helmRidge.isPickable = true;
+    helmRidge.metadata = { enemyId: id };
+    parts.push(helmRidge);
+
+    // 6. Glowing Demonic Horizontal Eye Slit
     const visor = MeshBuilder.CreateBox(
       `enemyVisor_${id}`,
-      { width: 0.5, height: 0.18, depth: 0.25 },
+      { width: 0.46, height: 0.1, depth: 0.26 },
       this.scene
     );
     visor.parent = root;
-    visor.position.set(0, 0.56, 0.32);
+    visor.position.set(0, 0.58, 0.34);
     visor.material = visorMat;
     visor.isPickable = true;
     visor.metadata = { enemyId: id };
+    parts.push(visor);
 
     this.shadowGenerator.addShadowCaster(root);
     this.shadowGenerator.addShadowCaster(chest);
+    this.shadowGenerator.addShadowCaster(pauldronLeft);
+    this.shadowGenerator.addShadowCaster(pauldronRight);
 
     const aggregate = new PhysicsAggregate(
       root,
@@ -122,7 +204,7 @@ export class EnemyController {
     const instance: EnemyInstance = {
       id,
       root,
-      parts: [root, chest, visor],
+      parts,
       bodyMat,
       visorMat,
       aggregate,
