@@ -4,9 +4,11 @@ import {
   LinesMesh,
   Mesh,
   MeshBuilder,
+  PointLight,
   Ray,
   Scene,
   StandardMaterial,
+  Texture,
   TransformNode,
   Vector3,
 } from '@babylonjs/core';
@@ -23,6 +25,7 @@ export class WeaponController {
   private readonly gunRig: TransformNode;
   private readonly muzzleNode: TransformNode;
   private readonly muzzleFlashMesh: Mesh;
+  private readonly muzzleLight: PointLight;
 
   private readonly restPosition = new Vector3(0.32, -0.28, 0.62);
   private recoilOffsetZ = 0;
@@ -39,67 +42,116 @@ export class WeaponController {
     this.gunRig.parent = camera;
     this.gunRig.position.copyFrom(this.restPosition);
 
-    const gunMetalMat = new StandardMaterial('gunMetalMat', scene);
-    gunMetalMat.diffuseColor = new Color3(0.18, 0.2, 0.24);
-    gunMetalMat.specularColor = new Color3(0.45, 0.45, 0.5);
+    // Gothic Materials
+    const darkIronMat = new StandardMaterial('gunIronMat', scene);
+    const ironTex = new Texture('/assets/textures/rusted_iron.png', scene);
+    ironTex.uScale = 1;
+    ironTex.vScale = 1;
+    darkIronMat.diffuseTexture = ironTex;
+    darkIronMat.diffuseColor = new Color3(0.6, 0.6, 0.6);
+    darkIronMat.specularColor = new Color3(0.35, 0.35, 0.38);
 
-    const gunAccentMat = new StandardMaterial('gunAccentMat', scene);
-    gunAccentMat.diffuseColor = new Color3(0.85, 0.42, 0.12);
-    gunAccentMat.emissiveColor = new Color3(0.25, 0.1, 0.02);
+    const agedWoodMat = new StandardMaterial('gunWoodMat', scene);
+    agedWoodMat.diffuseColor = new Color3(0.24, 0.16, 0.1);
+    agedWoodMat.specularColor = new Color3(0.08, 0.06, 0.04);
 
-    // Heavy receiver body
+    const brassMat = new StandardMaterial('gunBrassMat', scene);
+    brassMat.diffuseColor = new Color3(0.68, 0.52, 0.22);
+    brassMat.specularColor = new Color3(0.5, 0.4, 0.15);
+
+    // 1. Heavy Blackened Iron Receiver
     const receiver = MeshBuilder.CreateBox(
       'gunReceiver',
-      { width: 0.11, height: 0.14, depth: 0.48 },
+      { width: 0.12, height: 0.15, depth: 0.46 },
       scene
     );
     receiver.parent = this.gunRig;
-    receiver.material = gunMetalMat;
+    receiver.material = darkIronMat;
     receiver.isPickable = false;
 
-    // Heavy barrel shroud
-    const barrel = MeshBuilder.CreateBox(
+    // 2. Heavy Octagonal Iron Barrel
+    const barrel = MeshBuilder.CreateCylinder(
       'gunBarrel',
-      { width: 0.065, height: 0.08, depth: 0.34 },
+      { diameter: 0.088, height: 0.42, tessellation: 8 },
       scene
     );
     barrel.parent = this.gunRig;
-    barrel.position.set(0, 0.02, 0.32);
-    barrel.material = gunMetalMat;
+    barrel.rotation.x = Math.PI / 2;
+    barrel.position.set(0, 0.03, 0.38);
+    barrel.material = darkIronMat;
     barrel.isPickable = false;
 
-    // glowing side rail strip
-    const rail = MeshBuilder.CreateBox(
-      'gunRail',
-      { width: 0.12, height: 0.03, depth: 0.36 },
+    // 3. Flanged Iron Muzzle Ring
+    const muzzleRing = MeshBuilder.CreateCylinder(
+      'gunMuzzleRing',
+      { diameter: 0.115, height: 0.06, tessellation: 8 },
       scene
     );
-    rail.parent = this.gunRig;
-    rail.position.set(0, 0.055, 0.08);
-    rail.material = gunAccentMat;
-    rail.isPickable = false;
+    muzzleRing.parent = this.gunRig;
+    muzzleRing.rotation.x = Math.PI / 2;
+    muzzleRing.position.set(0, 0.03, 0.58);
+    muzzleRing.material = darkIronMat;
+    muzzleRing.isPickable = false;
 
+    // 4. Tarnished Brass Clamping Band
+    const band = MeshBuilder.CreateBox(
+      'gunBand',
+      { width: 0.13, height: 0.16, depth: 0.06 },
+      scene
+    );
+    band.parent = this.gunRig;
+    band.position.set(0, 0.01, 0.14);
+    band.material = brassMat;
+    band.isPickable = false;
+
+    // 5. Aged Oak Stock / Handle
+    const grip = MeshBuilder.CreateBox(
+      'gunGrip',
+      { width: 0.09, height: 0.18, depth: 0.16 },
+      scene
+    );
+    grip.parent = this.gunRig;
+    grip.position.set(0, -0.12, -0.14);
+    grip.rotation.x = -0.32;
+    grip.material = agedWoodMat;
+    grip.isPickable = false;
+
+    // Muzzle Node for flash, tracers, and dynamic flash light
     this.muzzleNode = new TransformNode('gunMuzzleNode', scene);
     this.muzzleNode.parent = this.gunRig;
-    this.muzzleNode.position.set(0, 0.02, 0.52);
+    this.muzzleNode.position.set(0, 0.03, 0.62);
 
     const flashMat = new StandardMaterial('muzzleFlashMat', scene);
-    flashMat.diffuseColor = new Color3(1, 0.85, 0.35);
-    flashMat.emissiveColor = new Color3(1, 0.72, 0.2);
+    flashMat.diffuseColor = new Color3(1.0, 0.65, 0.15);
+    flashMat.emissiveColor = new Color3(1.0, 0.55, 0.05);
 
-    this.muzzleFlashMesh = MeshBuilder.CreateSphere(
+    // Jagged flame muzzle flash cone
+    this.muzzleFlashMesh = MeshBuilder.CreateCylinder(
       'muzzleFlashMesh',
-      { diameter: 0.18, segments: 6 },
+      { diameterTop: 0.22, diameterBottom: 0.04, height: 0.3, tessellation: 6 },
       scene
     );
     this.muzzleFlashMesh.parent = this.muzzleNode;
+    this.muzzleFlashMesh.rotation.x = Math.PI / 2;
+    this.muzzleFlashMesh.position.z = 0.14;
     this.muzzleFlashMesh.material = flashMat;
     this.muzzleFlashMesh.isPickable = false;
     this.muzzleFlashMesh.isVisible = false;
+
+    // Dynamic shot flash point light illuminating surrounding stone/fog
+    this.muzzleLight = new PointLight(
+      'gunMuzzleLight',
+      new Vector3(0, 0, 0),
+      scene
+    );
+    this.muzzleLight.parent = this.muzzleNode;
+    this.muzzleLight.diffuse = new Color3(1.0, 0.65, 0.2);
+    this.muzzleLight.range = 14.0;
+    this.muzzleLight.intensity = 0;
   }
 
   /**
-   * Triggers visual recoil, muzzle flash, tracer line, and center-screen raycast.
+   * Triggers visual recoil, muzzle flash, dynamic light burst, tracer line, and center-screen raycast.
    */
   fireRaycast(): RaycastHitInfo {
     this.recoilOffsetZ = 0.14;
@@ -107,6 +159,7 @@ export class WeaponController {
     this.muzzleFlashTimer = 0.05;
     this.muzzleFlashMesh.isVisible = true;
     this.muzzleFlashMesh.scaling.setAll(0.85 + Math.random() * 0.4);
+    this.muzzleLight.intensity = 1.7;
 
     const origin = this.camera.globalPosition.clone();
     const forward = this.camera.getForwardRay(1).direction.normalize();
@@ -151,7 +204,7 @@ export class WeaponController {
       { points: [start, end] },
       this.scene
     );
-    line.color = new Color3(1.0, 0.85, 0.35);
+    line.color = new Color3(1.0, 0.72, 0.22);
     line.isPickable = false;
     this.activeTracer = { mesh: line, timer: 0.055 };
   }
@@ -181,6 +234,7 @@ export class WeaponController {
       this.muzzleFlashTimer -= dt;
       if (this.muzzleFlashTimer <= 0) {
         this.muzzleFlashMesh.isVisible = false;
+        this.muzzleLight.intensity = 0;
       }
     }
 
