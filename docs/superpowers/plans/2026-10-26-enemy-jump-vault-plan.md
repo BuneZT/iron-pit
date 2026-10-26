@@ -26,8 +26,8 @@
   - `stuckTimer: number`
   - `prevPosition: Vector3`
 
-- [ ] **Step 1: Update `EnemyInstance` interface and add scratch vectors in `EnemyController`**
-- [ ] **Step 2: Initialize `jumpCooldown`, `stuckTimer`, and `prevPosition` in `spawnEnemy()`**
+- [x] **Step 1: Update `EnemyInstance` interface and add scratch vectors in `EnemyController`**
+- [x] **Step 2: Initialize `jumpCooldown`, `stuckTimer`, and `prevPosition` in `spawnEnemy()`**
 
 ---
 
@@ -40,9 +40,9 @@
 **Interfaces:**
 - `update(dt: number, playerPosition: Vector3, waveNumber?: number): number`
 
-- [ ] **Step 1: Write unit tests in `tests/EnemyController.test.ts` for 3D contact distance and jump impulse triggering**
-- [ ] **Step 2: Implement stall detection, vertical pursuit leap, obstacle vault leap, and 3D contact damage in `EnemyController.update()`**
-- [ ] **Step 3: Run unit tests with `npm test` and verify passes**
+- [x] **Step 1: Write unit tests in `tests/EnemyController.test.ts` for 3D contact distance and jump impulse triggering**
+- [x] **Step 2: Implement stall detection, vertical pursuit leap, obstacle vault leap, and 3D contact damage in `EnemyController.update()`**
+- [x] **Step 3: Run unit tests with `npm test` and verify passes**
 
 ---
 
@@ -51,6 +51,6 @@
 **Files:**
 - All modified files
 
-- [ ] **Step 1: Run full Vitest suite (`npm test`)**
-- [ ] **Step 2: Run TypeScript check and production build (`npm run build`)**
-- [ ] **Step 3: Git commit clean state**
+- [x] **Step 1: Run full Vitest suite (`npm test`)**
+- [x] **Step 2: Run TypeScript check and production build (`npm run build`)**
+- [x] **Step 3: Git commit clean state**
