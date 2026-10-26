@@ -61,7 +61,7 @@ export class EnemyController {
     spawnPt.x += (Math.random() - 0.5) * 1.2;
     spawnPt.z += (Math.random() - 0.5) * 1.2;
 
-    // Dark rusted iron armor material with nearest point sampling
+    // Dark rusted iron armor & rotting flesh material (Nearest point sampled)
     const bodyMat = new StandardMaterial(`enemyBodyMat_${id}`, this.scene);
     const ironTex = new Texture(
       '/assets/textures/rusted_iron.png',
@@ -73,17 +73,22 @@ export class EnemyController {
     ironTex.uScale = 1;
     ironTex.vScale = 1;
     bodyMat.diffuseTexture = ironTex;
-    bodyMat.diffuseColor = new Color3(0.65, 0.6, 0.6);
-    bodyMat.specularColor = new Color3(0.15, 0.14, 0.12);
+    bodyMat.diffuseColor = new Color3(0.55, 0.48, 0.45);
+    bodyMat.specularColor = new Color3(0.1, 0.09, 0.08);
+
+    // Weathered bone / horn material
+    const hornMat = new StandardMaterial(`enemyHornMat_${id}`, this.scene);
+    hornMat.diffuseColor = new Color3(0.38, 0.35, 0.28);
+    hornMat.specularColor = new Color3(0.04, 0.04, 0.04);
 
     // Glowing demonic amber/crimson eye visor
     const visorMat = new StandardMaterial(`enemyVisorMat_${id}`, this.scene);
-    visorMat.diffuseColor = new Color3(1.0, 0.22, 0.05);
-    visorMat.emissiveColor = new Color3(1.0, 0.28, 0.06);
+    visorMat.diffuseColor = new Color3(1.0, 0.18, 0.02);
+    visorMat.emissiveColor = new Color3(1.0, 0.24, 0.04);
 
     const parts: Mesh[] = [];
 
-    // 1. Root Capsule Body
+    // 1. Root Capsule Body (Physics anchor)
     const root = MeshBuilder.CreateCapsule(
       `enemyRoot_${id}`,
       { height: 1.8, radius: 0.42 },
@@ -95,101 +100,199 @@ export class EnemyController {
     root.metadata = { enemyId: id };
     parts.push(root);
 
-    // 2. Heavy Angular Iron Cuirass (Breastplate)
-    const chest = MeshBuilder.CreateBox(
-      `enemyChest_${id}`,
-      { width: 0.78, height: 0.62, depth: 0.56 },
+    // 2. Heavy Hunched Spine & Shoulders (Forward pitched Quake Fiend posture)
+    const hunchSpine = MeshBuilder.CreateBox(
+      `enemyHunch_${id}`,
+      { width: 0.76, height: 0.65, depth: 0.68 },
       this.scene
     );
-    chest.parent = root;
-    chest.position.set(0, 0.16, 0.06);
-    chest.material = bodyMat;
-    chest.isPickable = true;
-    chest.metadata = { enemyId: id };
-    parts.push(chest);
+    hunchSpine.parent = root;
+    hunchSpine.position.set(0, 0.32, 0.08);
+    hunchSpine.rotation.x = 0.26;
+    hunchSpine.material = bodyMat;
+    hunchSpine.isPickable = true;
+    hunchSpine.metadata = { enemyId: id };
+    parts.push(hunchSpine);
 
-    // 3. Spiked Left Shoulder Pauldron
+    // 3. Crooked, Battered Iron Breastplate
+    const chestPlate = MeshBuilder.CreateBox(
+      `enemyChest_${id}`,
+      { width: 0.82, height: 0.54, depth: 0.58 },
+      this.scene
+    );
+    chestPlate.parent = root;
+    chestPlate.position.set(0, 0.18, 0.12);
+    chestPlate.rotation.set(0.12, 0, -0.04);
+    chestPlate.material = bodyMat;
+    chestPlate.isPickable = true;
+    chestPlate.metadata = { enemyId: id };
+    parts.push(chestPlate);
+
+    // 4. Forward-Thrusting Sunken Skull Helm
+    const skullHelm = MeshBuilder.CreateBox(
+      `enemySkull_${id}`,
+      { width: 0.38, height: 0.4, depth: 0.46 },
+      this.scene
+    );
+    skullHelm.parent = root;
+    skullHelm.position.set(0, 0.68, 0.36);
+    skullHelm.rotation.x = 0.2;
+    skullHelm.material = bodyMat;
+    skullHelm.isPickable = true;
+    skullHelm.metadata = { enemyId: id };
+    parts.push(skullHelm);
+
+    // 5. Asymmetrical Horns: Long curved left horn + broken shattered right stump
+    const hornLeft = MeshBuilder.CreateCylinder(
+      `enemyHornL_${id}`,
+      { diameterTop: 0.02, diameterBottom: 0.12, height: 0.55, tessellation: 5 },
+      this.scene
+    );
+    hornLeft.parent = skullHelm;
+    hornLeft.position.set(-0.16, 0.26, 0.02);
+    hornLeft.rotation.set(-0.45, 0.15, -0.38);
+    hornLeft.material = hornMat;
+    hornLeft.isPickable = true;
+    hornLeft.metadata = { enemyId: id };
+    parts.push(hornLeft);
+
+    const hornRight = MeshBuilder.CreateCylinder(
+      `enemyHornR_${id}`,
+      { diameterTop: 0.08, diameterBottom: 0.12, height: 0.18, tessellation: 5 },
+      this.scene
+    );
+    hornRight.parent = skullHelm;
+    hornRight.position.set(0.16, 0.16, 0.02);
+    hornRight.rotation.set(-0.2, -0.1, 0.32);
+    hornRight.material = hornMat;
+    hornRight.isPickable = true;
+    hornRight.metadata = { enemyId: id };
+    parts.push(hornRight);
+
+    // 6. Glowing Demonic Eye Slits (Deep-set under skull brow)
+    const eyeVisor = MeshBuilder.CreateBox(
+      `enemyEyes_${id}`,
+      { width: 0.32, height: 0.08, depth: 0.16 },
+      this.scene
+    );
+    eyeVisor.parent = skullHelm;
+    eyeVisor.position.set(0, 0.02, 0.22);
+    eyeVisor.material = visorMat;
+    eyeVisor.isPickable = true;
+    eyeVisor.metadata = { enemyId: id };
+    parts.push(eyeVisor);
+
+    // 7. Asymmetrical Shoulders: Massive spiked left pauldron + dented right plate
     const pauldronLeft = MeshBuilder.CreateBox(
       `enemyPauldronL_${id}`,
-      { width: 0.28, height: 0.28, depth: 0.36 },
+      { width: 0.38, height: 0.34, depth: 0.44 },
       this.scene
     );
     pauldronLeft.parent = root;
-    pauldronLeft.position.set(-0.46, 0.42, 0);
-    pauldronLeft.rotation.z = -0.28;
+    pauldronLeft.position.set(-0.48, 0.44, 0.06);
+    pauldronLeft.rotation.set(0.15, 0.05, -0.32);
     pauldronLeft.material = bodyMat;
     pauldronLeft.isPickable = true;
     pauldronLeft.metadata = { enemyId: id };
     parts.push(pauldronLeft);
 
-    const spikeL = MeshBuilder.CreateCylinder(
-      `enemySpikeL_${id}`,
-      { diameterTop: 0.02, diameterBottom: 0.1, height: 0.32, tessellation: 6 },
+    const spikeL1 = MeshBuilder.CreateCylinder(
+      `enemySpikeL1_${id}`,
+      { diameterTop: 0.02, diameterBottom: 0.1, height: 0.38, tessellation: 5 },
       this.scene
     );
-    spikeL.parent = pauldronLeft;
-    spikeL.position.set(-0.06, 0.2, 0);
-    spikeL.rotation.z = -0.25;
-    spikeL.material = bodyMat;
-    spikeL.isPickable = true;
-    spikeL.metadata = { enemyId: id };
-    parts.push(spikeL);
+    spikeL1.parent = pauldronLeft;
+    spikeL1.position.set(-0.08, 0.22, 0.06);
+    spikeL1.rotation.set(0.1, 0, -0.35);
+    spikeL1.material = hornMat;
+    spikeL1.isPickable = true;
+    spikeL1.metadata = { enemyId: id };
+    parts.push(spikeL1);
 
-    // 4. Spiked Right Shoulder Pauldron
     const pauldronRight = MeshBuilder.CreateBox(
       `enemyPauldronR_${id}`,
-      { width: 0.28, height: 0.28, depth: 0.36 },
+      { width: 0.32, height: 0.28, depth: 0.38 },
       this.scene
     );
     pauldronRight.parent = root;
-    pauldronRight.position.set(0.46, 0.42, 0);
-    pauldronRight.rotation.z = 0.28;
+    pauldronRight.position.set(0.46, 0.4, 0.04);
+    pauldronRight.rotation.set(0.1, -0.05, 0.24);
     pauldronRight.material = bodyMat;
     pauldronRight.isPickable = true;
     pauldronRight.metadata = { enemyId: id };
     parts.push(pauldronRight);
 
-    const spikeR = MeshBuilder.CreateCylinder(
-      `enemySpikeR_${id}`,
-      { diameterTop: 0.02, diameterBottom: 0.1, height: 0.32, tessellation: 6 },
+    // 8. Reaching Clawed Forearms (bent forward aggressively)
+    const armLeft = MeshBuilder.CreateBox(
+      `enemyArmL_${id}`,
+      { width: 0.18, height: 0.18, depth: 0.54 },
       this.scene
     );
-    spikeR.parent = pauldronRight;
-    spikeR.position.set(0.06, 0.2, 0);
-    spikeR.rotation.z = 0.25;
-    spikeR.material = bodyMat;
-    spikeR.isPickable = true;
-    spikeR.metadata = { enemyId: id };
-    parts.push(spikeR);
+    armLeft.parent = root;
+    armLeft.position.set(-0.48, 0.16, 0.28);
+    armLeft.rotation.set(-0.42, 0.15, -0.05);
+    armLeft.material = bodyMat;
+    armLeft.isPickable = true;
+    armLeft.metadata = { enemyId: id };
+    parts.push(armLeft);
 
-    // 5. Demonic Helm Ridge / Crest
-    const helmRidge = MeshBuilder.CreateBox(
-      `enemyHelmRidge_${id}`,
-      { width: 0.1, height: 0.2, depth: 0.38 },
+    const clawsLeft = MeshBuilder.CreateCylinder(
+      `enemyClawsL_${id}`,
+      { diameterTop: 0.01, diameterBottom: 0.08, height: 0.24, tessellation: 4 },
       this.scene
     );
-    helmRidge.parent = root;
-    helmRidge.position.set(0, 0.86, 0);
-    helmRidge.material = bodyMat;
-    helmRidge.isPickable = true;
-    helmRidge.metadata = { enemyId: id };
-    parts.push(helmRidge);
+    clawsLeft.parent = armLeft;
+    clawsLeft.position.set(0, 0, 0.32);
+    clawsLeft.rotation.x = Math.PI / 2;
+    clawsLeft.material = hornMat;
+    clawsLeft.isPickable = true;
+    clawsLeft.metadata = { enemyId: id };
+    parts.push(clawsLeft);
 
-    // 6. Glowing Demonic Horizontal Eye Slit
-    const visor = MeshBuilder.CreateBox(
-      `enemyVisor_${id}`,
-      { width: 0.46, height: 0.1, depth: 0.26 },
+    const armRight = MeshBuilder.CreateBox(
+      `enemyArmR_${id}`,
+      { width: 0.18, height: 0.18, depth: 0.54 },
       this.scene
     );
-    visor.parent = root;
-    visor.position.set(0, 0.58, 0.34);
-    visor.material = visorMat;
-    visor.isPickable = true;
-    visor.metadata = { enemyId: id };
-    parts.push(visor);
+    armRight.parent = root;
+    armRight.position.set(0.48, 0.12, 0.24);
+    armRight.rotation.set(-0.35, -0.12, 0.05);
+    armRight.material = bodyMat;
+    armRight.isPickable = true;
+    armRight.metadata = { enemyId: id };
+    parts.push(armRight);
 
+    const clawsRight = MeshBuilder.CreateCylinder(
+      `enemyClawsR_${id}`,
+      { diameterTop: 0.01, diameterBottom: 0.08, height: 0.24, tessellation: 4 },
+      this.scene
+    );
+    clawsRight.parent = armRight;
+    clawsRight.position.set(0, 0, 0.32);
+    clawsRight.rotation.x = Math.PI / 2;
+    clawsRight.material = hornMat;
+    clawsRight.isPickable = true;
+    clawsRight.metadata = { enemyId: id };
+    parts.push(clawsRight);
+
+    // 9. Ragged Iron Loin/Waist Tassets
+    const waistPlate = MeshBuilder.CreateBox(
+      `enemyWaist_${id}`,
+      { width: 0.58, height: 0.44, depth: 0.14 },
+      this.scene
+    );
+    waistPlate.parent = root;
+    waistPlate.position.set(0, -0.24, 0.22);
+    waistPlate.rotation.x = -0.14;
+    waistPlate.material = bodyMat;
+    waistPlate.isPickable = true;
+    waistPlate.metadata = { enemyId: id };
+    parts.push(waistPlate);
+
+    // Shadows
     this.shadowGenerator.addShadowCaster(root);
-    this.shadowGenerator.addShadowCaster(chest);
+    this.shadowGenerator.addShadowCaster(hunchSpine);
+    this.shadowGenerator.addShadowCaster(chestPlate);
     this.shadowGenerator.addShadowCaster(pauldronLeft);
     this.shadowGenerator.addShadowCaster(pauldronRight);
 
@@ -264,10 +367,10 @@ export class EnemyController {
     enemy.state = 'KNOCKED_DOWN';
     enemy.despawnTimer = 2.6;
     enemy.flashTimer = 0;
-    enemy.bodyMat.diffuseColor = new Color3(0.28, 0.28, 0.3);
-    enemy.bodyMat.emissiveColor = new Color3(0.15, 0.04, 0.02);
-    enemy.visorMat.emissiveColor = new Color3(0.05, 0.05, 0.05);
-    enemy.visorMat.diffuseColor = new Color3(0.2, 0.2, 0.2);
+    enemy.bodyMat.diffuseColor = new Color3(0.24, 0.22, 0.2);
+    enemy.bodyMat.emissiveColor = new Color3(0.12, 0.03, 0.02);
+    enemy.visorMat.emissiveColor = new Color3(0.04, 0.04, 0.04);
+    enemy.visorMat.diffuseColor = new Color3(0.15, 0.15, 0.15);
 
     enemy.aggregate.body.setMassProperties({
       mass: 1.2,

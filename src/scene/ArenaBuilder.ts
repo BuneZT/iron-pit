@@ -209,31 +209,36 @@ export class ArenaBuilder {
         scene
       );
 
-      // Gothic rusted iron spikes along parapet top
+      // Gothic rusted iron spikes along parapet top (with crooked tilts & variable heights)
       const spikeCount = 14;
       const step = arenaSize / spikeCount;
       for (let i = -spikeCount / 2; i <= spikeCount / 2; i++) {
+        const tiltZ = Math.sin(i * 3.7 + cfg.x * 2.1) * 0.18;
+        const tiltX = Math.cos(i * 2.9 + cfg.z * 1.7) * 0.18;
+        const spikeH = 0.65 + Math.abs(Math.sin(i * 1.9 + cfg.x)) * 0.32;
+
         const spike = MeshBuilder.CreateCylinder(
           `${cfg.name}_spike_${i}`,
           {
             diameterTop: 0.02,
             diameterBottom: 0.12,
-            height: 0.8,
-            tessellation: 6,
+            height: spikeH,
+            tessellation: 5,
           },
           scene
         );
         if (cfg.isAlongX) {
-          spike.position.set(i * step, parapetHeight + 0.4, cfg.z);
+          spike.position.set(i * step, parapetHeight + spikeH / 2, cfg.z);
         } else {
-          spike.position.set(cfg.x, parapetHeight + 0.4, i * step);
+          spike.position.set(cfg.x, parapetHeight + spikeH / 2, i * step);
         }
+        spike.rotation.set(tiltX, 0, tiltZ);
         spike.material = ironMat;
         spike.isPickable = false;
       }
     }
 
-    // 5. Gothic Monoliths & Crypt Barricades
+    // 5. Gothic Monoliths & Crypt Barricades (with weathered chips, uneven caps & fallen rubble)
     const megaliths = [
       { x: -9, z: -9, w: 2.8, h: 3.8, d: 2.8 },
       { x: 9, z: -9, w: 2.8, h: 3.8, d: 2.8 },
@@ -261,7 +266,48 @@ export class ArenaBuilder {
         scene
       );
 
-      // Rusted iron reinforcement bands clamped around the stone pillar
+      // Jagged chipped stone cap on top of megalith (slanted, irregular polygon)
+      const cap = MeshBuilder.CreateCylinder(
+        `megalithCap_${idx}`,
+        {
+          diameterTop: obs.w * 0.78,
+          diameterBottom: obs.w * 1.04,
+          height: 0.65,
+          tessellation: 5,
+        },
+        scene
+      );
+      cap.position.set(obs.x + 0.06, obs.h + 0.3, obs.z - 0.05);
+      cap.rotation.set(0.08, idx * 0.9, -0.06);
+      cap.material = cryptMat;
+      cap.isPickable = true;
+      shadowGenerator.addShadowCaster(cap);
+
+      // Fallen weathered stone rubble block at base
+      const rubble = MeshBuilder.CreateBox(
+        `megalithRubble_${idx}`,
+        { width: 0.95, height: 0.48, depth: 0.8 },
+        scene
+      );
+      rubble.position.set(
+        obs.x + (idx % 2 === 0 ? 1.7 : -1.7),
+        0.24,
+        obs.z + (idx > 1 ? 1.6 : -1.6)
+      );
+      rubble.rotation.set(0.14, idx * 1.3, -0.18);
+      rubble.material = cryptMat;
+      rubble.checkCollisions = true;
+      rubble.receiveShadows = true;
+      rubble.isPickable = true;
+      shadowGenerator.addShadowCaster(rubble);
+      new PhysicsAggregate(
+        rubble,
+        PhysicsShapeType.BOX,
+        { mass: 0, friction: 0.7, restitution: 0.1 },
+        scene
+      );
+
+      // Rusted iron reinforcement bands clamped around the stone pillar (slightly skewed)
       for (const bandY of [obs.h * 0.35, obs.h * 0.75]) {
         const band = MeshBuilder.CreateBox(
           `pillarBand_${idx}_${bandY.toFixed(1)}`,
@@ -269,12 +315,13 @@ export class ArenaBuilder {
           scene
         );
         band.position.set(obs.x, bandY, obs.z);
+        band.rotation.set(0, 0, (idx % 2 === 0 ? 0.03 : -0.03));
         band.material = ironMat;
         band.isPickable = false;
       }
     });
 
-    // Heavy crypt slab barricades
+    // Heavy crypt slab barricades with chipped corners & fallen fragments
     const barricades = [
       { x: 0, z: -13, w: 4.6, h: 1.9, d: 1.4 },
       { x: 0, z: 13, w: 4.6, h: 1.9, d: 1.4 },
@@ -301,15 +348,38 @@ export class ArenaBuilder {
         scene
       );
 
-      // Iron top trim
+      // Iron top trim (slightly offset & tilted)
       const ironCap = MeshBuilder.CreateBox(
         `barricadeCap_${idx}`,
         { width: obs.w + 0.08, height: 0.14, depth: obs.d + 0.08 },
         scene
       );
       ironCap.position.set(obs.x, obs.h + 0.07, obs.z);
+      ironCap.rotation.set(0.015, 0, (idx % 2 === 0 ? 0.02 : -0.02));
       ironCap.material = ironMat;
       ironCap.isPickable = false;
+
+      // Small fallen stone block at barricade end
+      const frag = MeshBuilder.CreateBox(
+        `barricadeFrag_${idx}`,
+        { width: 0.7, height: 0.35, depth: 0.6 },
+        scene
+      );
+      frag.position.set(
+        obs.x + (obs.w > obs.d ? obs.w / 2 + 0.4 : 0),
+        0.18,
+        obs.z + (obs.d > obs.w ? obs.d / 2 + 0.4 : 0)
+      );
+      frag.rotation.set(-0.1, idx * 0.8, 0.15);
+      frag.material = wallMat;
+      frag.checkCollisions = true;
+      frag.isPickable = true;
+      new PhysicsAggregate(
+        frag,
+        PhysicsShapeType.BOX,
+        { mass: 0, friction: 0.7 },
+        scene
+      );
     });
 
     // 6. 4 Gothic Iron Fire-Braziers with Dynamic Warm Amber Lights
@@ -323,13 +393,37 @@ export class ArenaBuilder {
     const brazierLights: PointLight[] = [];
 
     brazierPositions.forEach((pos, idx) => {
-      // Iron pedestal
+      // 3-legged crooked iron tripod pedestal
+      const legAngles = [0, (2 * Math.PI) / 3, (4 * Math.PI) / 3];
+      legAngles.forEach((ang, legIdx) => {
+        const leg = MeshBuilder.CreateCylinder(
+          `brazierLeg_${idx}_${legIdx}`,
+          { diameter: 0.08, height: 1.6, tessellation: 5 },
+          scene
+        );
+        const legDist = 0.35;
+        leg.position.set(
+          pos.x + Math.cos(ang) * legDist,
+          0.75,
+          pos.z + Math.sin(ang) * legDist
+        );
+        leg.rotation.set(
+          Math.sin(ang) * 0.22,
+          0,
+          -Math.cos(ang) * 0.22
+        );
+        leg.material = ironMat;
+        leg.isPickable = true;
+        shadowGenerator.addShadowCaster(leg);
+      });
+
+      // Central iron support column
       const pedestal = MeshBuilder.CreateCylinder(
         `brazierPedestal_${idx}`,
-        { diameterTop: 0.6, diameterBottom: 0.9, height: 1.5, tessellation: 8 },
+        { diameterTop: 0.45, diameterBottom: 0.7, height: 1.4, tessellation: 6 },
         scene
       );
-      pedestal.position.set(pos.x, 0.75, pos.z);
+      pedestal.position.set(pos.x, 0.7, pos.z);
       pedestal.material = ironMat;
       pedestal.isPickable = true;
       shadowGenerator.addShadowCaster(pedestal);
@@ -340,13 +434,14 @@ export class ArenaBuilder {
         scene
       );
 
-      // Iron fire bowl
+      // Jagged iron fire bowl (faceted 7-gon)
       const bowl = MeshBuilder.CreateCylinder(
         `brazierBowl_${idx}`,
-        { diameterTop: 1.3, diameterBottom: 0.65, height: 0.45, tessellation: 10 },
+        { diameterTop: 1.35, diameterBottom: 0.6, height: 0.48, tessellation: 7 },
         scene
       );
-      bowl.position.set(pos.x, 1.65, pos.z);
+      bowl.position.set(pos.x, 1.62, pos.z);
+      bowl.rotation.y = idx * 0.4;
       bowl.material = ironMat;
       bowl.isPickable = false;
 
@@ -356,7 +451,7 @@ export class ArenaBuilder {
         { diameter: 0.85, segments: 6 },
         scene
       );
-      embers.position.set(pos.x, 1.85, pos.z);
+      embers.position.set(pos.x, 1.82, pos.z);
       embers.material = emberMat;
       embers.isPickable = false;
 

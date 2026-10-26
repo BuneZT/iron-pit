@@ -99,7 +99,7 @@ export class WeaponController {
     muzzleRing.material = darkIronMat;
     muzzleRing.isPickable = false;
 
-    // 4. Tarnished Brass Clamping Band
+    // 4. Tarnished Brass Clamping Band & Heat Vent
     const band = MeshBuilder.CreateBox(
       'gunBand',
       { width: 0.13, height: 0.16, depth: 0.06 },
@@ -109,6 +109,53 @@ export class WeaponController {
     band.position.set(0, 0.01, 0.14);
     band.material = brassMat;
     band.isPickable = false;
+
+    // Brass heat shroud atop barrel
+    const heatShroud = MeshBuilder.CreateBox(
+      'gunHeatShroud',
+      { width: 0.095, height: 0.04, depth: 0.24 },
+      scene
+    );
+    heatShroud.parent = this.gunRig;
+    heatShroud.position.set(0, 0.075, 0.32);
+    heatShroud.material = brassMat;
+    heatShroud.isPickable = false;
+
+    // Welded side iron plate (asymmetrical battle repair)
+    const sidePlate = MeshBuilder.CreateBox(
+      'gunSidePlate',
+      { width: 0.025, height: 0.11, depth: 0.26 },
+      scene
+    );
+    sidePlate.parent = this.gunRig;
+    sidePlate.position.set(-0.068, 0.01, 0.04);
+    sidePlate.rotation.z = 0.04;
+    sidePlate.material = darkIronMat;
+    sidePlate.isPickable = false;
+
+    // Jagged cocking lever on right side
+    const cockingLever = MeshBuilder.CreateCylinder(
+      'gunCockingLever',
+      { diameter: 0.024, height: 0.08, tessellation: 5 },
+      scene
+    );
+    cockingLever.parent = this.gunRig;
+    cockingLever.rotation.z = Math.PI / 2;
+    cockingLever.position.set(0.08, 0.04, -0.05);
+    cockingLever.material = darkIronMat;
+    cockingLever.isPickable = false;
+
+    // Crooked front iron sight notch
+    const frontSight = MeshBuilder.CreateBox(
+      'gunFrontSight',
+      { width: 0.016, height: 0.038, depth: 0.04 },
+      scene
+    );
+    frontSight.parent = this.gunRig;
+    frontSight.position.set(0, 0.096, 0.54);
+    frontSight.rotation.y = -0.05;
+    frontSight.material = darkIronMat;
+    frontSight.isPickable = false;
 
     // 5. Aged Oak Stock / Handle
     const grip = MeshBuilder.CreateBox(
