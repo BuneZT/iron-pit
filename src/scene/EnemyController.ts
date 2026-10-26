@@ -72,9 +72,10 @@ export class EnemyController {
     spawnPt.z += (Math.random() - 0.5) * 1.2;
 
     // Dark rusted iron armor & rotting flesh material (Nearest point sampled)
+    const base = (import.meta.env?.BASE_URL ?? '/').replace(/\/+$/, '');
     const bodyMat = new StandardMaterial(`enemyBodyMat_${id}`, this.scene);
     const ironTex = new Texture(
-      '/assets/textures/rusted_iron.png',
+      `${base}/assets/textures/rusted_iron.png`,
       this.scene,
       false,
       true,

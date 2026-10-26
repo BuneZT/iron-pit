@@ -1,5 +1,7 @@
 # IRON PIT — 90s Gothic Arena Survival FPS
 
+> **🎮 [Play Live in Browser: https://bunezt.github.io/iron-pit/](https://bunezt.github.io/iron-pit/)**
+
 A dark, atmospheric wave-based 3D arena survival First-Person Shooter inspired by **Quake 1** and **Dark Forces**, built with **Babylon.js 7+**, **Havok Physics V2 (`@babylonjs/havok`)**, **TypeScript**, and **Vite**.
 
 ---

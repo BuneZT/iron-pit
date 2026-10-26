@@ -55,8 +55,9 @@ export class ArenaBuilder {
     shadowGenerator.blurKernel = 16;
 
     // 2. Static Retro Textures & Materials (Nearest-neighbor point sampling for gritty Quake/PS1 pixel crunch)
+    const base = (import.meta.env?.BASE_URL ?? '/').replace(/\/+$/, '');
     const floorTexture = new Texture(
-      '/assets/textures/stone_floor.png',
+      `${base}/assets/textures/stone_floor.png`,
       scene,
       false,
       true,
@@ -69,7 +70,7 @@ export class ArenaBuilder {
     floorMat.specularColor = new Color3(0.01, 0.01, 0.01);
 
     const wallTexture = new Texture(
-      '/assets/textures/dungeon_wall.png',
+      `${base}/assets/textures/dungeon_wall.png`,
       scene,
       false,
       true,
@@ -82,7 +83,7 @@ export class ArenaBuilder {
     wallMat.specularColor = new Color3(0.01, 0.01, 0.01);
 
     const cryptTexture = new Texture(
-      '/assets/textures/crypt_stone.png',
+      `${base}/assets/textures/crypt_stone.png`,
       scene,
       false,
       true,
@@ -95,7 +96,7 @@ export class ArenaBuilder {
     cryptMat.specularColor = new Color3(0.01, 0.01, 0.01);
 
     const ironTexture = new Texture(
-      '/assets/textures/rusted_iron.png',
+      `${base}/assets/textures/rusted_iron.png`,
       scene,
       false,
       true,

@@ -43,9 +43,10 @@ export class WeaponController {
     this.gunRig.position.copyFrom(this.restPosition);
 
     // Gothic Materials (Nearest point-sampled for authentic retro pixel grit)
+    const base = (import.meta.env?.BASE_URL ?? '/').replace(/\/+$/, '');
     const darkIronMat = new StandardMaterial('gunIronMat', scene);
     const ironTex = new Texture(
-      '/assets/textures/rusted_iron.png',
+      `${base}/assets/textures/rusted_iron.png`,
       scene,
       false,
       true,

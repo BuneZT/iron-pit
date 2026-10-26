@@ -6,13 +6,14 @@ export type SoundEffect =
   | 'knockdown'
   | 'hurt';
 
+const BASE = (import.meta.env?.BASE_URL ?? '/').replace(/\/+$/, '');
 const SOUND_FILES: Record<SoundEffect, { url: string; volume: number }> = {
-  gunshot: { url: '/assets/audio/gunshot.ogg', volume: 0.65 },
-  dryfire: { url: '/assets/audio/dryfire.ogg', volume: 0.5 },
-  reload: { url: '/assets/audio/reload.ogg', volume: 0.6 },
-  hit: { url: '/assets/audio/hit.ogg', volume: 0.6 },
-  knockdown: { url: '/assets/audio/knockdown.ogg', volume: 0.75 },
-  hurt: { url: '/assets/audio/hurt.ogg', volume: 0.7 },
+  gunshot: { url: `${BASE}/assets/audio/gunshot.ogg`, volume: 0.65 },
+  dryfire: { url: `${BASE}/assets/audio/dryfire.ogg`, volume: 0.5 },
+  reload: { url: `${BASE}/assets/audio/reload.ogg`, volume: 0.6 },
+  hit: { url: `${BASE}/assets/audio/hit.ogg`, volume: 0.6 },
+  knockdown: { url: `${BASE}/assets/audio/knockdown.ogg`, volume: 0.75 },
+  hurt: { url: `${BASE}/assets/audio/hurt.ogg`, volume: 0.7 },
 };
 
 export class AudioManager {
