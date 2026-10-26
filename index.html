@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IRON PIT — Arena Survival FPS</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        user-select: none;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0d0f14;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        color: #f3f4f6;
+      }
+
+      #gameCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        outline: none;
+      }
+
+      #hud {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 10;
+      }
+
+      /* Damage Vignette Flash */
+      #damageVignette {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        box-shadow: inset 0 0 110px rgba(220, 38, 38, 0.85);
+        opacity: 0;
+        transition: opacity 0.15s ease-out;
+      }
+
+      /* Top Status Bar */
+      .top-bar {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 18px;
+        align-items: center;
+        background: rgba(15, 18, 25, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-bottom: 3px solid #f97316;
+        padding: 10px 24px;
+        border-radius: 6px;
+        backdrop-filter: blur(4px);
+      }
+
+      .stat-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 110px;
+      }
+
+      .stat-label {
+        font-size: 11px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #9ca3af;
+      }
+
+      .stat-value {
+        font-size: 22px;
+        font-weight: 800;
+        color: #f9fafb;
+      }
+
+      .stat-value.accent {
+        color: #f97316;
+      }
+
+      /* Crosshair */
+      #crosshair {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 24px;
+        height: 24px;
+        transform: translate(-50%, -50%);
+        transition: transform 0.06s ease-out;
+      }
+
+      #crosshair.expanded {
+        transform: translate(-50%, -50%) scale(1.45);
+      }
+
+      .ch-line {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
+      }
+
+      #crosshair.hit .ch-line {
+        background: #ef4444;
+      }
+
+      .ch-top {
+        width: 2px;
+        height: 7px;
+        left: 11px;
+        top: 0;
+      }
+      .ch-bottom {
+        width: 2px;
+        height: 7px;
+        left: 11px;
+        bottom: 0;
+      }
+      .ch-left {
+        width: 7px;
+        height: 2px;
+        left: 0;
+        top: 11px;
+      }
+      .ch-right {
+        width: 7px;
+        height: 2px;
+        right: 0;
+        top: 11px;
+      }
+      .ch-dot {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        left: 11px;
+        top: 11px;
+        background: #f97316;
+      }
+
+      /* Bottom Left Health Panel */
+      .health-panel {
+        position: absolute;
+        bottom: 26px;
+        left: 28px;
+        width: 260px;
+        background: rgba(15, 18, 25, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-left: 4px solid #ef4444;
+        padding: 12px 16px;
+        border-radius: 6px;
+      }
+
+      .health-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 8px;
+      }
+
+      .health-title {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        color: #d1d5db;
+      }
+
+      .health-numbers {
+        font-size: 20px;
+        font-weight: 800;
+        color: #f87171;
+      }
+
+      .health-bar-bg {
+        width: 100%;
+        height: 10px;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      #healthBarFill {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, #dc2626, #f87171);
+        transition: width 0.15s ease-out;
+      }
+
+      /* Bottom Right Ammo Panel */
+      .ammo-panel {
+        position: absolute;
+        bottom: 26px;
+        right: 28px;
+        min-width: 220px;
+        background: rgba(15, 18, 25, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-right: 4px solid #f97316;
+        padding: 12px 18px;
+        border-radius: 6px;
+        text-align: right;
+      }
+
+      .weapon-name {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        color: #9ca3af;
+        margin-bottom: 4px;
+      }
+
+      .ammo-count {
+        font-size: 28px;
+        font-weight: 900;
+        color: #f9fafb;
+      }
+
+      .ammo-reserve {
+        font-size: 16px;
+        color: #9ca3af;
+      }
+
+      #reloadHint {
+        margin-top: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #fb923c;
+        min-height: 16px;
+      }
+
+      /* Modal Overlay (Start / Pause / Game Over) */
+      #modalOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(9, 11, 16, 0.84);
+        backdrop-filter: blur(6px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 25;
+      }
+
+      #modalOverlay.hidden {
+        display: none;
+      }
+
+      .modal-card {
+        background: #141822;
+        border: 1px solid rgba(249, 115, 22, 0.45);
+        border-top: 4px solid #f97316;
+        border-radius: 8px;
+        padding: 34px 42px;
+        max-width: 480px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+      }
+
+      .modal-title {
+        font-size: 36px;
+        font-weight: 900;
+        letter-spacing: 3px;
+        color: #f9fafb;
+        margin-bottom: 8px;
+      }
+
+      .modal-subtitle {
+        font-size: 14px;
+        color: #9ca3af;
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
+
+      .controls-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        text-align: left;
+        background: rgba(0, 0, 0, 0.32);
+        padding: 14px 16px;
+        border-radius: 6px;
+        margin-bottom: 26px;
+        font-size: 13px;
+      }
+
+      .key-badge {
+        display: inline-block;
+        background: #262c3a;
+        border: 1px solid #3f485e;
+        color: #f97316;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 4px;
+        margin-right: 6px;
+        font-size: 11px;
+      }
+
+      #actionButton {
+        pointer-events: auto;
+        cursor: pointer;
+        background: #f97316;
+        color: #0d0f14;
+        border: none;
+        font-size: 16px;
+        font-weight: 900;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        padding: 14px 32px;
+        border-radius: 6px;
+        width: 100%;
+        transition: background 0.15s ease, transform 0.1s ease;
+      }
+
+      #actionButton:hover {
+        background: #fb923c;
+        transform: translateY(-1px);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="hud">
+      <div id="damageVignette"></div>
+
+      <div class="top-bar">
+        <div class="stat-block">
+          <span class="stat-label">Wave</span>
+          <span id="waveValue" class="stat-value accent">1</span>
+        </div>
+        <div class="stat-block">
+          <span class="stat-label" id="enemiesLabel">Hostiles</span>
+          <span id="enemiesValue" class="stat-value">5</span>
+        </div>
+        <div class="stat-block">
+          <span class="stat-label">Kills</span>
+          <span id="killsValue" class="stat-value">0</span>
+        </div>
+      </div>
+
+      <div id="crosshair">
+        <div class="ch-line ch-top"></div>
+        <div class="ch-line ch-bottom"></div>
+        <div class="ch-line ch-left"></div>
+        <div class="ch-line ch-right"></div>
+        <div class="ch-dot"></div>
+      </div>
+
+      <div class="health-panel">
+        <div class="health-header">
+          <span class="health-title">ARMOR INTEGRITY</span>
+          <span id="healthText" class="health-numbers">100 / 100</span>
+        </div>
+        <div class="health-bar-bg">
+          <div id="healthBarFill"></div>
+        </div>
+      </div>
+
+      <div class="ammo-panel">
+        <div class="weapon-name">KINETIC SLUG CARBINE</div>
+        <div>
+          <span id="ammoValue" class="ammo-count">12</span>
+          <span class="ammo-reserve">/ ∞</span>
+        </div>
+        <div id="reloadHint">READY</div>
+      </div>
+    </div>
+
+    <div id="modalOverlay">
+      <div class="modal-card">
+        <h1 id="modalTitle" class="modal-title">IRON PIT</h1>
+        <p id="modalSubtitle" class="modal-subtitle">
+          Survive escalating waves of arena chasers. Heavy kinetic rounds
+          stagger and physically knock down targets.
+        </p>
+
+        <div class="controls-grid">
+          <div><span class="key-badge">WASD</span>Move</div>
+          <div><span class="key-badge">MOUSE</span>Aim</div>
+          <div><span class="key-badge">LMB</span>Fire Weapon</div>
+          <div><span class="key-badge">R</span>Reload</div>
+          <div><span class="key-badge">SHIFT</span>Sprint</div>
+          <div><span class="key-badge">SPACE</span>Jump</div>
+        </div>
+
+        <button id="actionButton" type="button">ENTER THE PIT</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
