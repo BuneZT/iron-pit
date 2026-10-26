@@ -84,9 +84,35 @@ export class GameApp {
       );
     };
 
-    this.hud = new HUDController(() => {
-      this.handleModalAction();
-    });
+    this.hud = new HUDController(
+      () => {
+        this.handleModalAction();
+      },
+      {
+        onMasterVolumeChange: (val) => {
+          this.audio.settings.setMasterVolume(val);
+          this.audio.applySettings();
+          this.saveAudioSettings();
+        },
+        onMusicVolumeChange: (val) => {
+          this.audio.settings.setMusicVolume(val);
+          this.audio.applySettings();
+          this.saveAudioSettings();
+        },
+        onSfxVolumeChange: (val) => {
+          this.audio.settings.setSfxVolume(val);
+          this.audio.applySettings();
+          this.saveAudioSettings();
+        },
+        onToggleMute: () => {
+          const isMuted = this.audio.settings.toggleMute();
+          this.audio.applySettings();
+          this.saveAudioSettings();
+          return isMuted;
+        },
+      }
+    );
+    this.hud.syncAudioSettings(this.audio.settings.data);
 
     this.bindInputEvents();
     this.syncHUD();
@@ -267,6 +293,19 @@ export class GameApp {
     }
 
     this.syncHUD();
+  }
+
+  private saveAudioSettings(): void {
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(
+          'iron_pit_audio_settings',
+          this.audio.settings.serialize()
+        );
+      } catch {
+        // Safe storage fallback
+      }
+    }
   }
 
   private syncHUD(): void {

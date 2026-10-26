@@ -1,5 +1,12 @@
 import { MatchStatus } from '../core/GameState';
 
+export interface AudioCallbacks {
+  onMasterVolumeChange?: (val01: number) => void;
+  onMusicVolumeChange?: (val01: number) => void;
+  onSfxVolumeChange?: (val01: number) => void;
+  onToggleMute?: () => boolean;
+}
+
 export interface HUDSnapshot {
   status: MatchStatus;
   wave: number;
@@ -32,15 +39,87 @@ export class HUDController {
     'actionButton'
   ) as HTMLButtonElement;
 
+  private readonly masterVolSlider = document.getElementById(
+    'masterVolSlider'
+  ) as HTMLInputElement | null;
+  private readonly masterVolValue = document.getElementById('masterVolValue');
+  private readonly musicVolSlider = document.getElementById(
+    'musicVolSlider'
+  ) as HTMLInputElement | null;
+  private readonly musicVolValue = document.getElementById('musicVolValue');
+  private readonly sfxVolSlider = document.getElementById(
+    'sfxVolSlider'
+  ) as HTMLInputElement | null;
+  private readonly sfxVolValue = document.getElementById('sfxVolValue');
+  private readonly muteButton = document.getElementById(
+    'muteButton'
+  ) as HTMLButtonElement | null;
+
   private crosshairExpandTimeout: number | null = null;
   private crosshairHitTimeout: number | null = null;
   private vignetteTimeout: number | null = null;
 
-  constructor(onActionButtonClick: () => void) {
+  constructor(
+    onActionButtonClick: () => void,
+    audioCallbacks?: AudioCallbacks
+  ) {
     this.actionButton.addEventListener('click', () => {
       this.actionButton.blur();
       onActionButtonClick();
     });
+
+    this.masterVolSlider?.addEventListener('input', (e) => {
+      const val = Number((e.target as HTMLInputElement).value);
+      if (this.masterVolValue) this.masterVolValue.textContent = `${val}%`;
+      audioCallbacks?.onMasterVolumeChange?.(val / 100);
+    });
+
+    this.musicVolSlider?.addEventListener('input', (e) => {
+      const val = Number((e.target as HTMLInputElement).value);
+      if (this.musicVolValue) this.musicVolValue.textContent = `${val}%`;
+      audioCallbacks?.onMusicVolumeChange?.(val / 100);
+    });
+
+    this.sfxVolSlider?.addEventListener('input', (e) => {
+      const val = Number((e.target as HTMLInputElement).value);
+      if (this.sfxVolValue) this.sfxVolValue.textContent = `${val}%`;
+      audioCallbacks?.onSfxVolumeChange?.(val / 100);
+    });
+
+    this.muteButton?.addEventListener('click', () => {
+      this.muteButton?.blur();
+      const isMuted = audioCallbacks?.onToggleMute?.() ?? false;
+      this.updateMuteButtonLabel(isMuted);
+    });
+  }
+
+  syncAudioSettings(data: {
+    masterVolume: number;
+    musicVolume: number;
+    sfxVolume: number;
+    isMuted: boolean;
+  }): void {
+    const masterPct = Math.round(data.masterVolume * 100);
+    const musicPct = Math.round(data.musicVolume * 100);
+    const sfxPct = Math.round(data.sfxVolume * 100);
+
+    if (this.masterVolSlider) this.masterVolSlider.value = String(masterPct);
+    if (this.masterVolValue) this.masterVolValue.textContent = `${masterPct}%`;
+
+    if (this.musicVolSlider) this.musicVolSlider.value = String(musicPct);
+    if (this.musicVolValue) this.musicVolValue.textContent = `${musicPct}%`;
+
+    if (this.sfxVolSlider) this.sfxVolSlider.value = String(sfxPct);
+    if (this.sfxVolValue) this.sfxVolValue.textContent = `${sfxPct}%`;
+
+    this.updateMuteButtonLabel(data.isMuted);
+  }
+
+  private updateMuteButtonLabel(isMuted: boolean): void {
+    if (this.muteButton) {
+      this.muteButton.textContent = isMuted ? 'UNMUTE AUDIO' : 'MUTE AUDIO';
+      this.muteButton.style.color = isMuted ? '#ef4444' : '#d6d3d1';
+    }
   }
 
   update(snapshot: HUDSnapshot): void {

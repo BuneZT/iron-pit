@@ -321,6 +321,98 @@
         font-size: 11px;
       }
 
+      /* Audio Settings Gothic Sliders */
+      .audio-settings-panel {
+        background: #0f0e0d;
+        border: 1px solid #383431;
+        padding: 12px 18px;
+        margin-bottom: 22px;
+        text-align: left;
+      }
+
+      .audio-setting-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      .audio-setting-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .audio-label {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        color: #a8a29e;
+        width: 60px;
+      }
+
+      .vol-number {
+        font-size: 11px;
+        font-weight: 800;
+        color: #fbbf24;
+        width: 38px;
+        text-align: right;
+        font-family: monospace;
+      }
+
+      .iron-slider {
+        flex: 1;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 8px;
+        background: #1c1917;
+        border: 1px solid #44403c;
+        outline: none;
+      }
+
+      .iron-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 14px;
+        height: 16px;
+        background: #d97706;
+        border: 1px solid #fbbf24;
+        cursor: pointer;
+        box-shadow: inset 1px 1px 0 #fde68a, inset -1px -1px 0 #78350f;
+      }
+
+      .iron-slider::-moz-range-thumb {
+        width: 14px;
+        height: 16px;
+        background: #d97706;
+        border: 1px solid #fbbf24;
+        cursor: pointer;
+      }
+
+      .audio-setting-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 8px;
+      }
+
+      .iron-sub-btn {
+        background: #1c1917;
+        border: 1px solid #574f49;
+        color: #d6d3d1;
+        font-family: inherit;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        padding: 4px 10px;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+      }
+
+      .iron-sub-btn:hover {
+        background: #292524;
+        color: #fbbf24;
+        border-color: #d97706;
+      }
+
       #actionButton {
         pointer-events: auto;
         cursor: pointer;
@@ -414,6 +506,27 @@
           <div><span class="key-badge">R</span>Reload</div>
           <div><span class="key-badge">SHIFT</span>Sprint</div>
           <div><span class="key-badge">SPACE</span>Jump</div>
+        </div>
+
+        <div class="audio-settings-panel">
+          <div class="audio-setting-row">
+            <span class="audio-label">MASTER</span>
+            <input id="masterVolSlider" type="range" min="0" max="100" value="80" class="iron-slider" />
+            <span id="masterVolValue" class="vol-number">80%</span>
+          </div>
+          <div class="audio-setting-row">
+            <span class="audio-label">MUSIC</span>
+            <input id="musicVolSlider" type="range" min="0" max="100" value="60" class="iron-slider" />
+            <span id="musicVolValue" class="vol-number">60%</span>
+          </div>
+          <div class="audio-setting-row">
+            <span class="audio-label">SFX</span>
+            <input id="sfxVolSlider" type="range" min="0" max="100" value="80" class="iron-slider" />
+            <span id="sfxVolValue" class="vol-number">80%</span>
+          </div>
+          <div class="audio-setting-actions">
+            <button id="muteButton" type="button" class="iron-sub-btn">MUTE AUDIO</button>
+          </div>
         </div>
 
         <button id="actionButton" type="button">ENTER THE PIT</button>
