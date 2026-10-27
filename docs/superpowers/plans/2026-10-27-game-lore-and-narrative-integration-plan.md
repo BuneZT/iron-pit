@@ -1,6 +1,6 @@
 # Game Lore and Narrative Integration Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Integrate the grim gothic lore of Mor'gath the Ash Sovereign into *Iron Pit* via pure TypeScript lore catalogs, an optional non-intrusive Chronicle modal, ambient wave breather whispers, lore-infused defeat messages, and a Wave 10 "Seal Shattered" victory choice, ensuring zero gameplay interruption and instantaneous retries.
 
@@ -42,7 +42,7 @@
   }
   ```
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/LoreCatalog.test.ts`:
 ```ts
@@ -87,12 +87,12 @@ describe('LoreCatalog', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/LoreCatalog.test.ts`
 Expected: FAIL with "Cannot find module '../src/core/LoreCatalog'"
 
-- [ ] **Step 3: Implement `LoreCatalog.ts`**
+- [x] **Step 3: Implement `LoreCatalog.ts`**
 
 Create `src/core/LoreCatalog.ts`:
 ```ts
@@ -155,12 +155,12 @@ export class LoreCatalog {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run tests/LoreCatalog.test.ts`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/core/LoreCatalog.ts tests/LoreCatalog.test.ts
@@ -178,7 +178,7 @@ git commit -m "feat(core): add LoreCatalog with Mor'gath lore, wave whispers, an
 - Consumes: `LoreCatalog.CHRONICLE_CHAPTERS`
 - Produces: DOM elements `#chronicleButton`, `#chronicleModal`, `#chronicleCloseButton`, `#waveWhisper`
 
-- [ ] **Step 1: Add HTML markup for Chronicle modal and ambient wave whisper**
+- [x] **Step 1: Add HTML markup for Chronicle modal and ambient wave whisper**
 
 In `index.html`:
 1. Inside `#hud`, immediately under `.top-bar`, add:
@@ -218,7 +218,7 @@ In `index.html`:
 </div>
 ```
 
-- [ ] **Step 2: Add CSS styles for Chronicle modal and wave whisper**
+- [x] **Step 2: Add CSS styles for Chronicle modal and wave whisper**
 
 In `index.html` inside `<style>`:
 ```css
@@ -359,12 +359,12 @@ In `index.html` inside `<style>`:
 }
 ```
 
-- [ ] **Step 3: Verify build / syntax**
+- [x] **Step 3: Verify build / syntax**
 
 Run: `npm run build`
 Expected: PASS (HTML and CSS parse cleanly)
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add index.html
@@ -385,7 +385,7 @@ git commit -m "feat(ui): add Chronicle modal markup and styling and ambient wave
 - Extends: `HUDSnapshot` with `isCurseBroken?: boolean; isVictoryScreen?: boolean;`
 - Produces: Ambient whisper lifecycle during wave breathers, Chronicle modal toggling, victory / escape action callback.
 
-- [ ] **Step 1: Write unit test for HUDController lore integration**
+- [x] **Step 1: Write unit test for HUDController lore integration**
 
 Create `tests/HUDControllerLore.test.ts`:
 ```ts
@@ -511,12 +511,12 @@ describe('HUDController Lore Integration', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/HUDControllerLore.test.ts`
 Expected: FAIL
 
-- [ ] **Step 3: Update `HUDController.ts` to implement lore bindings**
+- [x] **Step 3: Update `HUDController.ts` to implement lore bindings**
 
 In `src/ui/HUDController.ts`:
 - Import `LoreCatalog`.
@@ -538,17 +538,17 @@ In `src/ui/HUDController.ts`:
     - `this.modalSubtitle.textContent = LoreCatalog.getVictorySubtitle();`
     - `this.actionButton.textContent = 'ESCAPE TO THE SUN';`
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run tests/HUDControllerLore.test.ts`
 Expected: PASS
 
-- [ ] **Step 5: Run full test suite to check for regressions**
+- [x] **Step 5: Run full test suite to check for regressions**
 
 Run: `npm test`
 Expected: All tests PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/ui/HUDController.ts tests/HUDControllerLore.test.ts
@@ -568,7 +568,7 @@ git commit -m "feat(ui): integrate LoreCatalog into HUDController with ambient w
 - `GameState.isCurseBroken(wave: number): boolean`
 - `MatchStatus`: support optional victory resolution or milestone tracking without blocking endless play.
 
-- [ ] **Step 1: Write test for GameState curse breaking logic**
+- [x] **Step 1: Write test for GameState curse breaking logic**
 
 Create `tests/GameStateVictory.test.ts`:
 ```ts
@@ -593,12 +593,12 @@ describe('GameState Curse & Victory Logic', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/GameStateVictory.test.ts`
 Expected: FAIL
 
-- [ ] **Step 3: Update `src/core/GameState.ts`**
+- [x] **Step 3: Update `src/core/GameState.ts`**
 
 In `src/core/GameState.ts`:
 Add `private _isCurseBroken = false;`:
@@ -621,18 +621,18 @@ reset(): void {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run tests/GameStateVictory.test.ts`
 Expected: PASS
 
-- [ ] **Step 5: Connect in `GameApp.ts`**
+- [x] **Step 5: Connect in `GameApp.ts`**
 
 In `src/GameApp.ts`:
 Ensure `hud.update()` receives `isCurseBroken: this.gameState.isCurseBroken` in `HUDSnapshot`.
 Ensure that when the player clicks `actionButton` at Game Over or Menu, it immediately resumes / starts the fight.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/core/GameState.ts src/GameApp.ts tests/GameStateVictory.test.ts
@@ -650,7 +650,7 @@ git commit -m "feat(core): track curse broken milestone at wave 10 in GameState"
 - Consumes: `wave: number`
 - Produces: Dynamic light intensity and point light color shift for braziers as waves advance (re-sanctification of the arena without GC allocations).
 
-- [ ] **Step 1: Check existing brazier implementation in `ArenaBuilder.ts`**
+- [x] **Step 1: Check existing brazier implementation in `ArenaBuilder.ts`**
 
 Read `ArenaBuilder.ts` to locate brazier light instances and flame materials.
 Add a method `updateBrazierResanctification(wave: number): void` to `ArenaBuilder`:
@@ -659,16 +659,16 @@ Add a method `updateBrazierResanctification(wave: number): void` to `ArenaBuilde
 - Waves 8-10+: Cleansed radiant flame (intensity 2.2, brilliant gold-white `Color3(1.0, 0.85, 0.4)`).
 - Use cached colors or in-place component sets to guarantee zero runtime GC churn (Rule 3.2).
 
-- [ ] **Step 2: Update `GameApp.ts` to pass current wave during wave transitions**
+- [x] **Step 2: Update `GameApp.ts` to pass current wave during wave transitions**
 
 In `GameApp.ts`: call `this.arenaBuilder.updateBrazierResanctification(this.waveManager.currentWave)` when wave changes.
 
-- [ ] **Step 3: Verify TypeScript build**
+- [x] **Step 3: Verify TypeScript build**
 
 Run: `npm run build`
 Expected: PASS
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/scene/ArenaBuilder.ts src/GameApp.ts
@@ -679,17 +679,17 @@ git commit -m "feat(scene): add subtle brazier flame intensity scaling per wave"
 
 ### Task 6: Full Verification & End-to-End Test Suite
 
-- [ ] **Step 1: Run all unit tests**
+- [x] **Step 1: Run all unit tests**
 
 Run: `npm test`
 Expected: All test suites PASS (0 failures)
 
-- [ ] **Step 2: Run production bundle build and typecheck**
+- [x] **Step 2: Run production bundle build and typecheck**
 
 Run: `npm run build`
 Expected: Clean build with zero TypeScript or Vite errors.
 
-- [ ] **Step 3: Verify Git log and diff**
+- [x] **Step 3: Verify Git log and diff**
 
 Run: `git status`
 Expected: Clean working tree.
