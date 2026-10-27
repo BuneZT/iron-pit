@@ -231,7 +231,7 @@ export class HUDController {
     this.crosshairExpandTimeout = window.setTimeout(() => {
       this.crosshair.classList.remove('expanded');
       this.crosshairExpandTimeout = null;
-    }, 120);
+    }, 90);
 
     if (hitEnemy) {
       this.crosshair.classList.add('hit');
@@ -241,11 +241,11 @@ export class HUDController {
       this.crosshairHitTimeout = window.setTimeout(() => {
         this.crosshair.classList.remove('hit');
         this.crosshairHitTimeout = null;
-      }, 160);
+      }, 140);
     }
   }
 
-  triggerDamageVignette(): void {
+  flashDamageVignette(): void {
     this.damageVignette.style.opacity = '1';
     if (this.vignetteTimeout !== null) {
       window.clearTimeout(this.vignetteTimeout);
@@ -253,6 +253,10 @@ export class HUDController {
     this.vignetteTimeout = window.setTimeout(() => {
       this.damageVignette.style.opacity = '0';
       this.vignetteTimeout = null;
-    }, 180);
+    }, 220);
+  }
+
+  triggerDamageVignette(): void {
+    this.flashDamageVignette();
   }
 }

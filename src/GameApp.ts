@@ -275,6 +275,7 @@ export class GameApp {
     const toSpawn = this.waveManager.update(dt);
     if (this.waveManager.currentWave > prevWave) {
       this.audio.play('wave_bell');
+      this.gameState.checkWaveMilestone(this.waveManager.currentWave);
     }
     for (let i = 0; i < toSpawn; i++) {
       this.enemyController.spawnEnemy(
@@ -331,6 +332,7 @@ export class GameApp {
       ammo: this.weaponState.ammo,
       magazineSize: this.weaponState.magazineSize,
       isReloading: this.weaponState.isReloading,
+      isCurseBroken: this.gameState.isCurseBroken,
     });
   }
 }
