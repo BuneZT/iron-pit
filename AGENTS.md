@@ -10,7 +10,7 @@ This document defines the architecture, visual art direction, technical standard
 * **Genre:** 90s Gothic Retro Arena Survival First-Person Shooter (FPS) with heavy kinetic physics knockdowns.
 * **Aesthetic Identity & Setting:** Dark, grimy, tactile gothic aesthetic inspired by **Quake 1** and **Dark Forces**. Open-air crumbling stone ruins under an oppressive, overcast ash-grey sky, surrounded by dense distance fog with no visible skybox seams or ceiling enclosures.
 * **Tech Stack:** TypeScript 7 (`strict: true`, `noEmit: true`), Vite 8, `@babylonjs/core` (v9+), `@babylonjs/havok` (Physics V2 WASM), Vitest 5, HTML/CSS DOM HUD.
-* **Arena Scale:** `40m × 40m` flagstone ruins pit (`1 unit = 1 meter`), low crumbling stone parapets with crooked iron spikes, `1.8m` player/enemy height, gravity `(0, -18, 0)`.
+* **Arena Scale:** `100m × 100m` flagstone ruins pit (`1 unit = 1 meter`), low crumbling stone parapets with crooked iron spikes, `1.8m` player/enemy height, gravity `(0, -18, 0)`.
 
 ---
 
