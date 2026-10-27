@@ -440,6 +440,156 @@
         transform: translateY(1px);
         box-shadow: inset 2px 2px 0 #78350f, inset -1px -1px 0 #fde68a;
       }
+    
+      /* Ambient Wave Whisper (Non-Intrusive Breather Subtitle) */
+      .wave-whisper {
+        position: absolute;
+        top: 76px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: inherit;
+        font-size: 13px;
+        font-style: italic;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        color: #fbbf24;
+        text-shadow: 0 0 6px rgba(0, 0, 0, 0.9), 1px 1px 0 #000;
+        opacity: 0;
+        transition: opacity 0.4s ease-in-out;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+
+      .wave-whisper.visible {
+        opacity: 1;
+      }
+
+      /* Secondary Action Button (The Chronicle) */
+      .iron-secondary-btn {
+        pointer-events: auto;
+        cursor: pointer;
+        background: linear-gradient(180deg, #2a2725 0%, #171514 100%);
+        color: #d6d3d1;
+        border: 1px solid #574f49;
+        outline: 1px solid #0d0c0b;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        padding: 10px 24px;
+        width: 100%;
+        margin-top: 10px;
+        box-shadow: inset 1px 1px 0 #44403c, 0 4px 12px rgba(0, 0, 0, 0.7);
+        transition: background 0.15s, color 0.15s, border-color 0.15s;
+      }
+
+      .iron-secondary-btn:hover {
+        background: #36322e;
+        color: #fbbf24;
+        border-color: #d97706;
+      }
+
+      /* Chronicle Modal (Weathered Stone Grimoire Overlay) */
+      .chronicle-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.88);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        transition: opacity 0.2s ease-out;
+      }
+
+      .chronicle-overlay.hidden {
+        display: none;
+      }
+
+      .chronicle-card {
+        width: 90%;
+        max-width: 680px;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(180deg, #1f1d1b 0%, #121110 100%);
+        border: 2px solid #574f49;
+        outline: 2px solid #0d0c0b;
+        box-shadow: inset 1px 1px 0 #78716c, inset -2px -2px 0 #1c1917, 0 12px 32px rgba(0, 0, 0, 0.95);
+        border-left: 6px solid #d97706;
+        padding: 24px 28px;
+      }
+
+      .chronicle-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #3d3835;
+        padding-bottom: 12px;
+        margin-bottom: 16px;
+      }
+
+      .chronicle-title {
+        font-size: 18px;
+        font-weight: 900;
+        letter-spacing: 3px;
+        color: #fbbf24;
+      }
+
+      .chronicle-close-btn {
+        background: transparent;
+        border: none;
+        color: #a8a29e;
+        font-size: 24px;
+        cursor: pointer;
+        line-height: 1;
+      }
+
+      .chronicle-close-btn:hover {
+        color: #ef4444;
+      }
+
+      .chronicle-content {
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding-right: 8px;
+      }
+
+      .chronicle-chapter {
+        background: rgba(20, 18, 17, 0.6);
+        border: 1px solid #383430;
+        padding: 14px 16px;
+      }
+
+      .chapter-title {
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: #d97706;
+        margin-bottom: 6px;
+      }
+
+      .chapter-body {
+        font-size: 13px;
+        line-height: 1.6;
+        color: #d6d3d1;
+      }
+
+      .chronicle-footer {
+        margin-top: 16px;
+        padding-top: 10px;
+        border-top: 1px solid #2d2926;
+        text-align: center;
+      }
+
+      .chronicle-hint {
+        font-size: 11px;
+        letter-spacing: 2px;
+        color: #78716c;
+      }
     </style>
   </head>
   <body>
@@ -462,6 +612,7 @@
           <span id="killsValue" class="stat-value">0</span>
         </div>
       </div>
+      <div id="waveWhisper" class="wave-whisper"></div>
 
       <div id="crosshair">
         <div class="ch-line ch-top"></div>
@@ -530,6 +681,40 @@
         </div>
 
         <button id="actionButton" type="button">ENTER THE PIT</button>
+        <button id="chronicleButton" type="button" class="iron-secondary-btn">THE CHRONICLE</button>
+      </div>
+    </div>
+
+    
+    <div id="chronicleModal" class="chronicle-overlay hidden">
+      <div class="chronicle-card">
+        <div class="chronicle-header">
+          <h2 class="chronicle-title">CHRONICLE OF THE PIT</h2>
+          <button id="chronicleCloseButton" type="button" class="chronicle-close-btn">&times;</button>
+        </div>
+        <div class="chronicle-content">
+          <div class="chronicle-chapter">
+            <h3 class="chapter-title">I. THE DESECRATED SLEEP</h3>
+            <p class="chapter-body">
+              Seeking refuge from a killing ash storm, a lone traveler struck a fire upon an ancient slab of black stone. It was no hearth, but the binding seal of Mor'gath, the Ash Sovereign. The flame broke the seal, waking the demon from centuries of slumber.
+            </p>
+          </div>
+          <div class="chronicle-chapter">
+            <h3 class="chapter-title">II. THE SOVEREIGN'S TETHER</h3>
+            <p class="chapter-body">
+              Enraged by mortal insolence, Mor'gath dragged the intruder into the sunken Iron Pit, cursing them to die and resurrect in an endless cycle. Yet awoken prematurely, the demon cannot walk the earth; each fiend it spawns is a living sliver of its own soul. Every fiend slain permanently starves the demon.
+            </p>
+          </div>
+          <div class="chronicle-chapter">
+            <h3 class="chapter-title">III. THE TENTH BELL</h3>
+            <p class="chapter-body">
+              In supreme arrogance, Mor'gath swore a dark blood-oath: no mortal could survive ten onslaughts. If ten bells toll and the traveler still draws breath, the demon's tether shatters, the re-sanctified altar ignites, and the pit shall grant passage to the light.
+            </p>
+          </div>
+        </div>
+        <div class="chronicle-footer">
+          <span class="chronicle-hint">PRESS [ESC] OR CLICK TO RETURN</span>
+        </div>
       </div>
     </div>
 
