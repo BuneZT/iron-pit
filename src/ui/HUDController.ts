@@ -91,7 +91,7 @@ export class HUDController {
 
     this.chronicleModal?.addEventListener('click', (e) => {
       if (e.target === this.chronicleModal) {
-        this.chronicleModal.classList.add('hidden');
+        this.chronicleModal?.classList.add('hidden');
       }
     });
 

@@ -125,7 +125,7 @@ export class GameApp {
       const rawDt = this.engine.getDeltaTime() / 1000;
       const dt = Math.min(rawDt, 0.1);
       this.totalTime += dt;
-      this.updateBraziers(this.totalTime);
+      this.updateBraziers(this.totalTime, this.waveManager.currentWave);
       this.update(dt);
     });
 
@@ -161,6 +161,7 @@ export class GameApp {
     this.weaponState.reset();
     this.waveManager.reset();
     this.waveManager.startFirstWave();
+    this.arenaBuilder.updateBrazierResanctification(1);
     this.gameState.startMatch();
     this.audio.startMusic();
     this.audio.duckMusic(false);
@@ -244,12 +245,14 @@ export class GameApp {
     this.syncHUD();
   }
 
-  private updateBraziers(time: number): void {
+  private updateBraziers(time: number, wave: number): void {
+    const waveBonus = Math.min(0.5, Math.max(0, (wave - 1) * 0.05));
+    const baseIntensity = 0.76 + waveBonus;
     for (let i = 0; i < this.brazierLights.length; i++) {
       const light = this.brazierLights[i];
       const offset = i * 1.7;
       light.intensity =
-        0.76 +
+        baseIntensity +
         0.14 * Math.sin((time + offset) * 7.5) +
         0.06 * Math.cos((time + offset) * 17.3);
     }
@@ -276,6 +279,7 @@ export class GameApp {
     if (this.waveManager.currentWave > prevWave) {
       this.audio.play('wave_bell');
       this.gameState.checkWaveMilestone(this.waveManager.currentWave);
+      this.arenaBuilder.updateBrazierResanctification(this.waveManager.currentWave);
     }
     for (let i = 0; i < toSpawn; i++) {
       this.enemyController.spawnEnemy(

@@ -41,7 +41,7 @@ class MockElement {
 describe('HUDController Lore Integration', () => {
   let elements: Record<string, MockElement>;
   let windowListeners: Record<string, ((e: any) => void)[]>;
-  let actionCallback: ReturnType<typeof vi.fn>;
+  let actionCallback: () => void;
 
   beforeEach(() => {
     elements = {};
@@ -93,7 +93,10 @@ describe('HUDController Lore Integration', () => {
       setTimeout: vi.fn()
     };
 
-    actionCallback = vi.fn();
+    const mockFn = vi.fn();
+    actionCallback = () => {
+      mockFn();
+    };
   });
 
   it('updates start menu subtitle with LoreCatalog.INTRO_SUBTITLE', () => {
@@ -163,7 +166,7 @@ describe('HUDController Lore Integration', () => {
   });
 
   it('opens and closes Chronicle modal via buttons', () => {
-    const hud = new HUDController(actionCallback);
+    new HUDController(actionCallback);
     expect(elements['chronicleModal'].classList.contains('hidden')).toBe(true);
 
     elements['chronicleButton'].click();
@@ -174,7 +177,7 @@ describe('HUDController Lore Integration', () => {
   });
 
   it('closes Chronicle modal on Escape key', () => {
-    const hud = new HUDController(actionCallback);
+    new HUDController(actionCallback);
     elements['chronicleButton'].click();
     expect(elements['chronicleModal'].classList.contains('hidden')).toBe(false);
 

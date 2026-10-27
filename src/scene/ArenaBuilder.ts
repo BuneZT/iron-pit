@@ -546,6 +546,17 @@ export class ArenaBuilder {
     return this.brazierLights;
   }
 
+  public updateBrazierResanctification(wave: number): void {
+    const waveProgress = Math.min(1.0, Math.max(0, (wave - 1) / 9));
+    const r = 1.0;
+    const g = 0.62 + waveProgress * 0.23;
+    const b = 0.22 + waveProgress * 0.18;
+    for (const light of this.brazierLights) {
+      light.diffuse.set(r, g, b);
+      light.range = 22.0 + waveProgress * 8.0;
+    }
+  }
+
   static build(scene: Scene, layout?: ArenaLayout): ArenaData {
     const builder = new ArenaBuilder(scene);
     const activeLayout = layout ?? ArenaLayoutGenerator.generate(1);
