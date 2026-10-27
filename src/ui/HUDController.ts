@@ -1,4 +1,5 @@
 import { MatchStatus } from '../core/GameState';
+import { LoreCatalog } from '../core/LoreCatalog';
 
 export interface AudioCallbacks {
   onMasterVolumeChange?: (val01: number) => void;
@@ -19,6 +20,7 @@ export interface HUDSnapshot {
   ammo: number;
   magazineSize: number;
   isReloading: boolean;
+  isCurseBroken?: boolean;
 }
 
 export class HUDController {
@@ -38,6 +40,15 @@ export class HUDController {
   private readonly actionButton = document.getElementById(
     'actionButton'
   ) as HTMLButtonElement;
+
+  private readonly chronicleButton = document.getElementById(
+    'chronicleButton'
+  ) as HTMLButtonElement | null;
+  private readonly chronicleModal = document.getElementById('chronicleModal');
+  private readonly chronicleCloseButton = document.getElementById(
+    'chronicleCloseButton'
+  ) as HTMLButtonElement | null;
+  private readonly waveWhisper = document.getElementById('waveWhisper');
 
   private readonly masterVolSlider = document.getElementById(
     'masterVolSlider'
@@ -66,6 +77,28 @@ export class HUDController {
     this.actionButton.addEventListener('click', () => {
       this.actionButton.blur();
       onActionButtonClick();
+    });
+
+    this.chronicleButton?.addEventListener('click', () => {
+      this.chronicleButton?.blur();
+      this.chronicleModal?.classList.remove('hidden');
+    });
+
+    this.chronicleCloseButton?.addEventListener('click', () => {
+      this.chronicleCloseButton?.blur();
+      this.chronicleModal?.classList.add('hidden');
+    });
+
+    this.chronicleModal?.addEventListener('click', (e) => {
+      if (e.target === this.chronicleModal) {
+        this.chronicleModal.classList.add('hidden');
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !this.chronicleModal?.classList.contains('hidden')) {
+        this.chronicleModal?.classList.add('hidden');
+      }
     });
 
     this.masterVolSlider?.addEventListener('input', (e) => {
@@ -152,14 +185,27 @@ export class HUDController {
       this.reloadHint.textContent = 'READY';
     }
 
+    // Ambient wave whisper during breathers
+    if (this.waveWhisper) {
+      if (snapshot.isInBreather) {
+        const whisperText = LoreCatalog.getWaveWhisper(snapshot.wave);
+        if (this.waveWhisper.textContent !== whisperText) {
+          this.waveWhisper.textContent = whisperText;
+        }
+        this.waveWhisper.classList.add('visible');
+      } else {
+        this.waveWhisper.classList.remove('visible');
+      }
+    }
+
     if (snapshot.status === 'PLAYING') {
       this.modalOverlay.classList.add('hidden');
+      this.chronicleModal?.classList.add('hidden');
     } else {
       this.modalOverlay.classList.remove('hidden');
       if (snapshot.status === 'MENU') {
         this.modalTitle.textContent = 'IRON PIT';
-        this.modalSubtitle.textContent =
-          'Survive escalating waves of demonic chasers in the foggy ruins. Heavy kinetic rounds stagger and physically knock down targets.';
+        this.modalSubtitle.textContent = LoreCatalog.INTRO_SUBTITLE;
         this.actionButton.textContent = 'ENTER THE PIT';
       } else if (snapshot.status === 'PAUSED') {
         this.modalTitle.textContent = 'PAUSED';
@@ -167,7 +213,11 @@ export class HUDController {
         this.actionButton.textContent = 'RESUME FIGHT';
       } else if (snapshot.status === 'GAME_OVER') {
         this.modalTitle.textContent = 'OVERRUN';
-        this.modalSubtitle.textContent = `You fell at Wave ${snapshot.wave} after slaying ${snapshot.kills} hostiles (Score: ${snapshot.score}).`;
+        this.modalSubtitle.textContent = LoreCatalog.getGameOverMessage(
+          snapshot.wave,
+          snapshot.kills,
+          snapshot.score
+        );
         this.actionButton.textContent = 'RETURN TO PIT';
       }
     }
@@ -180,7 +230,8 @@ export class HUDController {
     }
     this.crosshairExpandTimeout = window.setTimeout(() => {
       this.crosshair.classList.remove('expanded');
-    }, 90);
+      this.crosshairExpandTimeout = null;
+    }, 120);
 
     if (hitEnemy) {
       this.crosshair.classList.add('hit');
@@ -189,17 +240,19 @@ export class HUDController {
       }
       this.crosshairHitTimeout = window.setTimeout(() => {
         this.crosshair.classList.remove('hit');
-      }, 140);
+        this.crosshairHitTimeout = null;
+      }, 160);
     }
   }
 
-  flashDamageVignette(): void {
+  triggerDamageVignette(): void {
     this.damageVignette.style.opacity = '1';
     if (this.vignetteTimeout !== null) {
       window.clearTimeout(this.vignetteTimeout);
     }
     this.vignetteTimeout = window.setTimeout(() => {
       this.damageVignette.style.opacity = '0';
-    }, 220);
+      this.vignetteTimeout = null;
+    }, 180);
   }
 }
