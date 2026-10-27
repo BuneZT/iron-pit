@@ -12,6 +12,7 @@ import HavokPhysics from '@babylonjs/havok';
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import { EnemyController } from '../src/scene/EnemyController';
+import { ArenaLayoutGenerator } from '../src/core/ArenaLayoutGenerator';
 
 describe('EnemyController Jump & Vault Mechanics', () => {
   async function createTestEnv() {
@@ -110,5 +111,37 @@ describe('EnemyController Jump & Vault Mechanics', () => {
     controller.update(0.016, new Vector3(0, 0.9, 0), 1);
     expect(enemy.root.position.x).toBe(-49.2);
     expect(enemy.root.position.z).toBe(49.2);
+  });
+
+  it('spawns enemies in distance fog away from player when initialized with ArenaLayout', async () => {
+    const wasmPath = resolve(__dirname, '../public/wasm/HavokPhysics.wasm');
+    const wasmBuffer = readFileSync(wasmPath);
+    const wasmBinary = wasmBuffer.buffer.slice(
+      wasmBuffer.byteOffset,
+      wasmBuffer.byteOffset + wasmBuffer.byteLength
+    );
+    const havokInstance = await HavokPhysics({ wasmBinary });
+    const havokPlugin = new HavokPlugin(true, havokInstance);
+
+    const engine = new NullEngine();
+    const scene = new Scene(engine);
+    scene.enablePhysics(new Vector3(0, -18, 0), havokPlugin);
+
+    const dirLight = new DirectionalLight('dir', new Vector3(0, -1, 0), scene);
+    const shadowGen = new ShadowGenerator(512, dirLight);
+
+    const layout = ArenaLayoutGenerator.generate(42);
+    const controller = new EnemyController(scene, layout, shadowGen);
+
+    const playerPos = new Vector3(0, 0.9, 0);
+    const enemy = controller.spawnEnemy(1, playerPos);
+
+    const dist = Math.hypot(
+      enemy.root.position.x - playerPos.x,
+      enemy.root.position.z - playerPos.z
+    );
+    expect(dist).toBeGreaterThanOrEqual(28.0);
+    expect(Math.abs(enemy.root.position.x)).toBeLessThanOrEqual(layout.arenaBounds);
+    expect(Math.abs(enemy.root.position.z)).toBeLessThanOrEqual(layout.arenaBounds);
   });
 });

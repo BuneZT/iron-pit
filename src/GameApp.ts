@@ -1,4 +1,5 @@
 import { Engine, PointLight, Scene } from '@babylonjs/core';
+import { ArenaLayoutGenerator } from './core/ArenaLayoutGenerator';
 import { AudioSettings } from './core/AudioSettings';
 import { GameState } from './core/GameState';
 import { HealthState } from './core/HealthState';
@@ -35,6 +36,7 @@ export class GameApp {
   private player!: PlayerController;
   private weaponController!: WeaponController;
   private enemyController!: EnemyController;
+  private arenaBuilder!: ArenaBuilder;
   private brazierLights: PointLight[] = [];
   private totalTime = 0;
 
@@ -60,7 +62,9 @@ export class GameApp {
     this.audio.preload();
     await initializeScenePhysics(this.scene);
 
-    const arena = ArenaBuilder.build(this.scene);
+    const initialLayout = ArenaLayoutGenerator.generate();
+    const arena = ArenaBuilder.build(this.scene, initialLayout);
+    this.arenaBuilder = arena.builder;
     this.brazierLights = arena.brazierLights;
     this.player = new PlayerController(this.scene);
     this.weaponController = new WeaponController(
@@ -69,7 +73,7 @@ export class GameApp {
     );
     this.enemyController = new EnemyController(
       this.scene,
-      arena.spawnPoints,
+      initialLayout,
       arena.shadowGenerator
     );
 
@@ -149,6 +153,9 @@ export class GameApp {
 
   private startNewMatch(): void {
     this.enemyController.clearAll();
+    const newLayout = ArenaLayoutGenerator.generate();
+    this.brazierLights = this.arenaBuilder.rebuildDynamicLayout(newLayout);
+    this.enemyController.setLayout(newLayout);
     this.player.reset();
     this.healthState.reset();
     this.weaponState.reset();
@@ -270,7 +277,10 @@ export class GameApp {
       this.audio.play('wave_bell');
     }
     for (let i = 0; i < toSpawn; i++) {
-      this.enemyController.spawnEnemy(this.waveManager.currentWave);
+      this.enemyController.spawnEnemy(
+        this.waveManager.currentWave,
+        this.player.position
+      );
     }
 
     const contactDamage = this.enemyController.update(

@@ -11,6 +11,10 @@ import {
   Texture,
   Vector3,
 } from '@babylonjs/core';
+import {
+  ArenaLayoutGenerator,
+  type ArenaLayout,
+} from '../core/ArenaLayoutGenerator';
 
 export interface EnemyInstance {
   id: number;
@@ -34,9 +38,10 @@ export type EnemyHitOutcome = 'NONE' | 'HIT' | 'KILLED';
 
 export class EnemyController {
   private readonly scene: Scene;
-  private readonly spawnPoints: Vector3[];
   private readonly shadowGenerator: ShadowGenerator;
   private readonly enemies = new Map<number, EnemyInstance>();
+  private layout?: ArenaLayout;
+  private spawnPoints: Vector3[] = [];
   private nextId = 1;
   private spawnIndex = 0;
 
@@ -56,23 +61,41 @@ export class EnemyController {
 
   constructor(
     scene: Scene,
-    spawnPoints: Vector3[],
+    spawnSource: Vector3[] | ArenaLayout,
     shadowGenerator: ShadowGenerator
   ) {
     this.scene = scene;
-    this.spawnPoints = spawnPoints;
+    if (Array.isArray(spawnSource)) {
+      this.spawnPoints = spawnSource;
+    } else {
+      this.layout = spawnSource;
+    }
     this.shadowGenerator = shadowGenerator;
   }
 
-  spawnEnemy(waveNumber = 1): EnemyInstance {
-    const id = this.nextId++;
-    const spawnPt =
-      this.spawnPoints[this.spawnIndex % this.spawnPoints.length].clone();
-    this.spawnIndex += 1;
+  setLayout(layout: ArenaLayout): void {
+    this.layout = layout;
+  }
 
-    // Slight jitter so consecutive spawns don't overlap identically
-    spawnPt.x += (Math.random() - 0.5) * 1.2;
-    spawnPt.z += (Math.random() - 0.5) * 1.2;
+  spawnEnemy(waveNumber = 1, playerPos?: Vector3): EnemyInstance {
+    const id = this.nextId++;
+    let spawnPt: Vector3;
+
+    if (this.layout) {
+      const p2d = playerPos
+        ? { x: playerPos.x, z: playerPos.z }
+        : { x: 0, z: 0 };
+      const fogPos = ArenaLayoutGenerator.findFogSpawnPoint(p2d, this.layout);
+      spawnPt = new Vector3(fogPos.x, 1.1, fogPos.z);
+    } else if (this.spawnPoints.length > 0) {
+      spawnPt =
+        this.spawnPoints[this.spawnIndex % this.spawnPoints.length].clone();
+      this.spawnIndex += 1;
+      spawnPt.x += (Math.random() - 0.5) * 1.2;
+      spawnPt.z += (Math.random() - 0.5) * 1.2;
+    } else {
+      spawnPt = new Vector3(38, 1.1, 38);
+    }
 
     // Dark rusted iron armor & rotting flesh material (Nearest point sampled)
     const base = (import.meta.env?.BASE_URL ?? '/').replace(/\/+$/, '');
@@ -111,6 +134,14 @@ export class EnemyController {
     root.position.copyFrom(spawnPt);
     root.isVisible = false;
     root.isPickable = false;
+
+    if (playerPos) {
+      const dirX = playerPos.x - spawnPt.x;
+      const dirZ = playerPos.z - spawnPt.z;
+      const initialYaw = Math.atan2(dirX, dirZ);
+      Quaternion.FromEulerAnglesToRef(0, initialYaw, 0, this.tmpTargetRot);
+      root.rotationQuaternion = this.tmpTargetRot.clone();
+    }
 
     // 2. Heavy Angular Torso (Upper Cuirass, Midsection Vertebrae, Pelvis)
     // Upper Ribcage / Cuirass (faceted, aggressive forward hunch)
