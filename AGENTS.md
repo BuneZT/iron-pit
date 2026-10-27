@@ -146,6 +146,17 @@ Calling `mesh.dispose()` in Babylon.js **does not** automatically dispose its at
 * **Hitbox Propagation:**
   * Every visible anatomical child mesh must set `mesh.isPickable = true` and `mesh.metadata = { enemyId: id }` so raycast hit detection works accurately across the entire humanoid body.
 
+### 3.11 Gothic Narrative Tone & UI Copy Standards
+* **Atmospheric Arena Terminology over Generic Arcade/Casual Jargon:**
+  * All player-facing UI text, modal screens, prompts, button labels, and status callouts must uphold a grim, dark gothic arena atmosphere inspired by *Quake 1*, *Dark Forces*, and dark fantasy gladiatorial combat.
+  * Never use generic, sanitized arcade or sterile military phrases:
+    - **Replay / Game Over:** Use `"RETURN TO PIT"` instead of `"PLAY AGAIN"` or `"RETRY"`.
+    - **Resume / Unpause:** Use `"RESUME FIGHT"` instead of `"RESUME GAME"` or `"CONTINUE"`.
+    - **Game Start:** Use `"ENTER THE PIT"` instead of `"START GAME"` or `"PLAY"`.
+    - **Wave Cleared:** Use `"PURGED"` or `"SLAIN"` instead of generic `"CLEAR"` or `"ELIMINATED"`.
+    - **Defeat / Loss:** Frame defeat somberly (e.g., `"OVERRUN"` / `"You fell at Wave X after slaying Y hostiles"`).
+    - **Adversaries:** Refer to foes as `"fiends"`, `"hostiles"`, or `"demonic chasers"` rather than casual `"enemies"` or `"monsters"`.
+
 ---
 
 ## 4. Development & Verification Workflow

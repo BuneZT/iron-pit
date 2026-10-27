@@ -126,7 +126,7 @@ export class HUDController {
     this.waveValue.textContent = String(Math.max(1, snapshot.wave));
     if (snapshot.isInBreather) {
       this.enemiesLabel.textContent = 'Status';
-      this.enemiesValue.textContent = 'CLEAR';
+      this.enemiesValue.textContent = 'PURGED';
     } else {
       this.enemiesLabel.textContent = 'Hostiles';
       this.enemiesValue.textContent = String(snapshot.remainingEnemies);
@@ -159,16 +159,16 @@ export class HUDController {
       if (snapshot.status === 'MENU') {
         this.modalTitle.textContent = 'IRON PIT';
         this.modalSubtitle.textContent =
-          'Survive escalating waves of arena chasers. Heavy kinetic rounds stagger and physically knock down targets.';
+          'Survive escalating waves of demonic chasers in the foggy ruins. Heavy kinetic rounds stagger and physically knock down targets.';
         this.actionButton.textContent = 'ENTER THE PIT';
       } else if (snapshot.status === 'PAUSED') {
         this.modalTitle.textContent = 'PAUSED';
-        this.modalSubtitle.textContent = `Wave ${snapshot.wave} in progress — ${snapshot.kills} hostiles eliminated.`;
-        this.actionButton.textContent = 'RESUME COMBAT';
+        this.modalSubtitle.textContent = `Wave ${snapshot.wave} suspended — ${snapshot.kills} hostiles slain.`;
+        this.actionButton.textContent = 'RESUME FIGHT';
       } else if (snapshot.status === 'GAME_OVER') {
         this.modalTitle.textContent = 'OVERRUN';
-        this.modalSubtitle.textContent = `You reached Wave ${snapshot.wave} and eliminated ${snapshot.kills} hostiles (Score: ${snapshot.score}).`;
-        this.actionButton.textContent = 'PLAY AGAIN';
+        this.modalSubtitle.textContent = `You fell at Wave ${snapshot.wave} after slaying ${snapshot.kills} hostiles (Score: ${snapshot.score}).`;
+        this.actionButton.textContent = 'RETURN TO PIT';
       }
     }
   }
