@@ -41,7 +41,7 @@ export class EnemyController {
   private spawnIndex = 0;
 
   private readonly maxHp = 100;
-  private readonly baseMoveSpeed = 4.6;
+  private readonly baseMoveSpeed = 5.5;
   private readonly contactDistance = 1.45;
   private readonly contactDamage = 15;
 
@@ -680,16 +680,16 @@ export class EnemyController {
 
       // Clamp within arena bounds to prevent physics tunneling
       if (
-        Math.abs(enemy.root.position.x) > 19.2 ||
-        Math.abs(enemy.root.position.z) > 19.2
+        Math.abs(enemy.root.position.x) > 49.2 ||
+        Math.abs(enemy.root.position.z) > 49.2
       ) {
         enemy.root.position.x = Math.max(
-          -19.2,
-          Math.min(19.2, enemy.root.position.x)
+          -49.2,
+          Math.min(49.2, enemy.root.position.x)
         );
         enemy.root.position.z = Math.max(
-          -19.2,
-          Math.min(19.2, enemy.root.position.z)
+          -49.2,
+          Math.min(49.2, enemy.root.position.z)
         );
       }
     }

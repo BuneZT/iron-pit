@@ -18,8 +18,8 @@ export class PlayerController {
   private verticalVelocity = 0;
   private isGrounded = true;
 
-  private readonly walkSpeed = 6.5;
-  private readonly sprintSpeed = 10.0;
+  private readonly walkSpeed = 7.2;
+  private readonly sprintSpeed = 12.0;
   private readonly jumpSpeed = 7.8;
   private readonly gravity = -20.0;
   private readonly mouseSensitivity = 0.0022;
@@ -160,12 +160,12 @@ export class PlayerController {
 
     // Clamp player within arena bounds
     this.collider.position.x = Math.max(
-      -19.2,
-      Math.min(19.2, this.collider.position.x)
+      -49.2,
+      Math.min(49.2, this.collider.position.x)
     );
     this.collider.position.z = Math.max(
-      -19.2,
-      Math.min(19.2, this.collider.position.z)
+      -49.2,
+      Math.min(49.2, this.collider.position.z)
     );
 
     // Footstep cadence when moving and grounded
