@@ -31,9 +31,9 @@ export interface Point2D {
 }
 
 export class ArenaLayoutGenerator {
-  static readonly SAFE_RADIUS = 12.0;
+  static readonly SAFE_RADIUS = 10.0;
   static readonly ARENA_BOUNDS = 44.0;
-  static readonly MIN_OBSTACLE_SPACING = 7.0;
+  static readonly MIN_OBSTACLE_SPACING = 6.5;
 
   private static createRng(seed?: number): () => number {
     if (seed === undefined) {
@@ -61,10 +61,10 @@ export class ArenaLayoutGenerator {
       { signX: 1, signZ: -1, baseAngle: (7 * Math.PI) / 4 },
     ];
 
-    // 1. Generate 1 Gothic Megalith in each quadrant
+    // 1. Generate 1 Gothic Megalith in each quadrant (16m to 26m from axes)
     quadrants.forEach((q, idx) => {
-      const x = q.signX * (20 + rng() * 14); // 20m to 34m
-      const z = q.signZ * (20 + rng() * 14);
+      const x = q.signX * (16 + rng() * 10);
+      const z = q.signZ * (16 + rng() * 10);
       const w = 3.5 + rng() * 0.5;
       const d = 3.5 + rng() * 0.5;
       const h = 4.4 + rng() * 0.8;
@@ -104,20 +104,20 @@ export class ArenaLayoutGenerator {
         if (attempts % 2 === 0) {
           // Cardinal-oriented
           if (isHorizontal) {
-            bx = q.signX * (10 + rng() * 18);
-            bz = q.signZ * (28 + rng() * 10);
+            bx = q.signX * (10 + rng() * 14);
+            bz = q.signZ * (20 + rng() * 8);
           } else {
-            bx = q.signX * (28 + rng() * 10);
-            bz = q.signZ * (10 + rng() * 18);
+            bx = q.signX * (20 + rng() * 8);
+            bz = q.signZ * (10 + rng() * 14);
           }
         } else {
           // Mid-field
-          bx = q.signX * (16 + rng() * 18);
-          bz = q.signZ * (16 + rng() * 18);
+          bx = q.signX * (14 + rng() * 12);
+          bz = q.signZ * (14 + rng() * 12);
         }
 
         const distCenter = Math.hypot(bx, bz);
-        if (distCenter < this.SAFE_RADIUS + 1.0) continue;
+        if (distCenter < this.SAFE_RADIUS + 0.5) continue;
         if (
           Math.abs(bx) > this.ARENA_BOUNDS - 2 ||
           Math.abs(bz) > this.ARENA_BOUNDS - 2
@@ -157,11 +157,11 @@ export class ArenaLayoutGenerator {
 
         while (extraAttempts < 25 && !extraValid) {
           extraAttempts++;
-          eBx = q.signX * (14 + rng() * 22);
-          eBz = q.signZ * (14 + rng() * 22);
+          eBx = q.signX * (12 + rng() * 16);
+          eBz = q.signZ * (12 + rng() * 16);
 
           const distCenter = Math.hypot(eBx, eBz);
-          if (distCenter < this.SAFE_RADIUS + 1.5) continue;
+          if (distCenter < this.SAFE_RADIUS + 1.0) continue;
           if (
             Math.abs(eBx) > this.ARENA_BOUNDS - 2 ||
             Math.abs(eBz) > this.ARENA_BOUNDS - 2
@@ -193,7 +193,7 @@ export class ArenaLayoutGenerator {
       }
     });
 
-    // 3. Generate 1 Iron Brazier per quadrant in the inner perimeter ring
+    // 3. Generate 1 Iron Brazier per quadrant in the inner perimeter ring (11m to 16m)
     quadrants.forEach((q, idx) => {
       let bX = 0;
       let bZ = 0;
@@ -202,8 +202,8 @@ export class ArenaLayoutGenerator {
 
       while (attempts < 30 && !valid) {
         attempts++;
-        const angle = q.baseAngle + (rng() - 0.5) * 0.6;
-        const dist = this.SAFE_RADIUS + 1.5 + rng() * 7.0; // 13.5m to 20.5m
+        const angle = q.baseAngle + (rng() - 0.5) * 0.5;
+        const dist = this.SAFE_RADIUS + 1.0 + rng() * 5.0; // 11.0m to 16.0m
         bX = Math.cos(angle) * dist;
         bZ = Math.sin(angle) * dist;
 
@@ -215,7 +215,7 @@ export class ArenaLayoutGenerator {
 
         const allObs = [...megaliths, ...barricades, ...braziers];
         const tooClose = allObs.some(
-          (obs) => Math.hypot(obs.x - bX, obs.z - bZ) < 5.0
+          (obs) => Math.hypot(obs.x - bX, obs.z - bZ) < 4.5
         );
         if (!tooClose) {
           valid = true;
@@ -224,8 +224,8 @@ export class ArenaLayoutGenerator {
 
       if (!valid) {
         // Fallback default position in quadrant
-        bX = q.signX * 14;
-        bZ = q.signZ * 14;
+        bX = q.signX * 12;
+        bZ = q.signZ * 12;
       }
 
       braziers.push({
@@ -249,8 +249,8 @@ export class ArenaLayoutGenerator {
     layout: ArenaLayout,
     rng: () => number = Math.random
   ): Point2D {
-    const minDistance = 30.0;
-    const maxDistance = 42.0;
+    const minDistance = 24.0;
+    const maxDistance = 32.0;
     const allObstacles = [...layout.megaliths, ...layout.barricades];
 
     // Try up to 30 randomized samples in the distance fog
@@ -258,7 +258,7 @@ export class ArenaLayoutGenerator {
       // If player is close to arena edge, bias spawn angle toward arena center
       let angle = rng() * Math.PI * 2;
       const playerDistFromOrigin = Math.hypot(playerPos.x, playerPos.z);
-      if (playerDistFromOrigin > 25) {
+      if (playerDistFromOrigin > 22) {
         const centerAngle = Math.atan2(-playerPos.z, -playerPos.x);
         angle = centerAngle + (rng() - 0.5) * Math.PI * 1.3;
       }
@@ -272,7 +272,7 @@ export class ArenaLayoutGenerator {
       candZ = Math.max(-layout.arenaBounds, Math.min(layout.arenaBounds, candZ));
 
       const actualDist = Math.hypot(candX - playerPos.x, candZ - playerPos.z);
-      if (actualDist < 25.0) {
+      if (actualDist < 20.0) {
         continue;
       }
 
@@ -295,9 +295,9 @@ export class ArenaLayoutGenerator {
     const signX = playerPos.x >= 0 ? -1 : 1;
     const signZ = playerPos.z >= 0 ? -1 : 1;
     const cornerCandidates = [
-      { x: signX * 40.0, z: signZ * 40.0 },
-      { x: signX * 42.0, z: signZ * 20.0 },
-      { x: signX * 20.0, z: signZ * 42.0 },
+      { x: signX * 36.0, z: signZ * 36.0 },
+      { x: signX * 38.0, z: signZ * 20.0 },
+      { x: signX * 20.0, z: signZ * 38.0 },
     ];
     for (const c of cornerCandidates) {
       const collides = allObstacles.some(

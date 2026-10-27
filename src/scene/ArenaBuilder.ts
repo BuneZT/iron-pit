@@ -276,9 +276,9 @@ export class ArenaBuilder {
     }
     this.brazierLights = [];
 
-    // 3. Dispose previous dynamic meshes
+    // 3. Dispose previous dynamic meshes (do not dispose shared materials/textures!)
     for (const mesh of this.dynamicMeshes) {
-      mesh.dispose(false, true);
+      mesh.dispose(false, false);
     }
     this.dynamicMeshes.length = 0;
 

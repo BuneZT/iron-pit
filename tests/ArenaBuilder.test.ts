@@ -112,6 +112,8 @@ describe('ArenaBuilder brazier collision', () => {
 
     const newPillar = scene.getMeshByName('gothicMegalith_0');
     expect(newPillar).toBeDefined();
+    expect(newPillar?.material).toBeDefined();
+    expect((newPillar?.material as any)?.diffuseTexture).toBeDefined();
     expect(newPillar?.position.x).toBe(newLayout.megaliths[0].x);
     expect(oldPillar?.isDisposed()).toBe(true);
   });

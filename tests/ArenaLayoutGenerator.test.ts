@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ArenaLayoutGenerator } from '../src/core/ArenaLayoutGenerator';
 
 describe('ArenaLayoutGenerator', () => {
-  it('enforces center safe zone (minimum 12m from player spawn at 0,0)', () => {
+  it('enforces center safe zone (minimum 10m from player spawn at 0,0)', () => {
     for (let run = 0; run < 10; run++) {
       const layout = ArenaLayoutGenerator.generate(run * 100);
       const allObstacles = [
@@ -82,14 +82,14 @@ describe('ArenaLayoutGenerator', () => {
   });
 
   describe('findFogSpawnPoint', () => {
-    it('generates a spawn point in the distance fog (>= 28m from player)', () => {
+    it('generates a spawn point in the distance fog (>= 22m from player)', () => {
       const layout = ArenaLayoutGenerator.generate(123);
       const playerPos = { x: 0, z: 0 };
 
       for (let i = 0; i < 20; i++) {
         const spawn = ArenaLayoutGenerator.findFogSpawnPoint(playerPos, layout);
         const dist = Math.hypot(spawn.x - playerPos.x, spawn.z - playerPos.z);
-        expect(dist).toBeGreaterThanOrEqual(28.0);
+        expect(dist).toBeGreaterThanOrEqual(22.0);
         expect(Math.abs(spawn.x)).toBeLessThanOrEqual(layout.arenaBounds);
         expect(Math.abs(spawn.z)).toBeLessThanOrEqual(layout.arenaBounds);
       }
@@ -105,7 +105,7 @@ describe('ArenaLayoutGenerator', () => {
           layout
         );
         const dist = Math.hypot(spawn.x - cornerPlayer.x, spawn.z - cornerPlayer.z);
-        expect(dist).toBeGreaterThanOrEqual(25.0);
+        expect(dist).toBeGreaterThanOrEqual(20.0);
         expect(Math.abs(spawn.x)).toBeLessThanOrEqual(layout.arenaBounds);
         expect(Math.abs(spawn.z)).toBeLessThanOrEqual(layout.arenaBounds);
       }

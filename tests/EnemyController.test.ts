@@ -140,7 +140,7 @@ describe('EnemyController Jump & Vault Mechanics', () => {
       enemy.root.position.x - playerPos.x,
       enemy.root.position.z - playerPos.z
     );
-    expect(dist).toBeGreaterThanOrEqual(28.0);
+    expect(dist).toBeGreaterThanOrEqual(22.0);
     expect(Math.abs(enemy.root.position.x)).toBeLessThanOrEqual(layout.arenaBounds);
     expect(Math.abs(enemy.root.position.z)).toBeLessThanOrEqual(layout.arenaBounds);
   });
