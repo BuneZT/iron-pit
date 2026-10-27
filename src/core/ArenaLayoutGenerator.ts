@@ -32,7 +32,7 @@ export interface Point2D {
 
 export class ArenaLayoutGenerator {
   static readonly SAFE_RADIUS = 10.0;
-  static readonly ARENA_BOUNDS = 44.0;
+  static readonly ARENA_BOUNDS = 42.0;
   static readonly MIN_OBSTACLE_SPACING = 6.5;
 
   private static createRng(seed?: number): () => number {
@@ -61,10 +61,22 @@ export class ArenaLayoutGenerator {
       { signX: 1, signZ: -1, baseAngle: (7 * Math.PI) / 4 },
     ];
 
-    // 1. Generate 1 Gothic Megalith in each quadrant (16m to 26m from axes)
+    // 1. Generate Gothic Megaliths (4-5 total, staggered across mid-field AND outer wall flanks)
     quadrants.forEach((q, idx) => {
-      const x = q.signX * (16 + rng() * 10);
-      const z = q.signZ * (16 + rng() * 10);
+      // Stagger depths: 2 quadrants get mid-field megaliths, 2 get outer wall-flank megaliths
+      const isOuter = idx % 2 === 1;
+      let mx = 0;
+      let mz = 0;
+      if (isOuter) {
+        // Outer sector near the wall (27m to 35m)
+        mx = q.signX * (27 + rng() * 8);
+        mz = q.signZ * (27 + rng() * 8);
+      } else {
+        // Mid-field sector (17m to 24m)
+        mx = q.signX * (17 + rng() * 7);
+        mz = q.signZ * (17 + rng() * 7);
+      }
+
       const w = 3.5 + rng() * 0.5;
       const d = 3.5 + rng() * 0.5;
       const h = 4.4 + rng() * 0.8;
@@ -72,8 +84,8 @@ export class ArenaLayoutGenerator {
       megaliths.push({
         id: `megalith_${idx}`,
         type: 'MEGALITH',
-        x,
-        z,
+        x: mx,
+        z: mz,
         width: w,
         height: h,
         depth: d,
@@ -86,124 +98,155 @@ export class ArenaLayoutGenerator {
       });
     });
 
-    // 2. Generate Crypt Barricades (1 or 2 per quadrant)
-    quadrants.forEach((q, idx) => {
-      // Primary cardinal/diagonal barricade
-      const isHorizontal = rng() > 0.5;
-      const bLen = 5.8 + rng() * 1.0;
-      const bThick = 1.4;
+    // Optional 5th outer megalith for asymmetrical gothic ruin silhouette
+    const extraQ = quadrants[Math.floor(rng() * 4)];
+    const extraMx = extraQ.signX * (28 + rng() * 7);
+    const extraMz = extraQ.signZ * (14 + rng() * 10);
+    const extraCollides = megaliths.some(
+      (m) => Math.hypot(m.x - extraMx, m.z - extraMz) < this.MIN_OBSTACLE_SPACING
+    );
+    if (!extraCollides) {
+      megaliths.push({
+        id: `megalith_4`,
+        type: 'MEGALITH',
+        x: extraMx,
+        z: extraMz,
+        width: 3.6,
+        height: 4.8,
+        depth: 3.6,
+        rotationY: (rng() - 0.5) * 0.25,
+        capAngle: rng() * Math.PI * 2,
+        rubbleOffset: { x: 2.2, z: -2.1 },
+      });
+    }
 
-      // Position along cardinal or diagonal lanes
+    // 2. Generate Crypt Barricades: 4 Mid-field + 4 Outer Wall-Flank (8 total)
+    quadrants.forEach((q, idx) => {
+      // --- Mid-Field Barricade (12m - 24m) ---
+      let attempts = 0;
+      let midValid = false;
       let bx = 0;
       let bz = 0;
-      let attempts = 0;
-      let valid = false;
+      const bLen = 5.8 + rng() * 1.0;
+      const bThick = 1.4;
+      const isHoriz = rng() > 0.5;
 
-      while (attempts < 20 && !valid) {
+      while (attempts < 25 && !midValid) {
         attempts++;
         if (attempts % 2 === 0) {
-          // Cardinal-oriented
-          if (isHorizontal) {
-            bx = q.signX * (10 + rng() * 14);
-            bz = q.signZ * (20 + rng() * 8);
+          // Cardinal lane
+          if (isHoriz) {
+            bx = q.signX * (10 + rng() * 12);
+            bz = q.signZ * (18 + rng() * 8);
           } else {
-            bx = q.signX * (20 + rng() * 8);
-            bz = q.signZ * (10 + rng() * 14);
+            bx = q.signX * (18 + rng() * 8);
+            bz = q.signZ * (10 + rng() * 12);
           }
         } else {
-          // Mid-field
-          bx = q.signX * (14 + rng() * 12);
-          bz = q.signZ * (14 + rng() * 12);
+          // Mid diagonal lane
+          bx = q.signX * (13 + rng() * 10);
+          bz = q.signZ * (13 + rng() * 10);
         }
 
         const distCenter = Math.hypot(bx, bz);
         if (distCenter < this.SAFE_RADIUS + 0.5) continue;
-        if (
-          Math.abs(bx) > this.ARENA_BOUNDS - 2 ||
-          Math.abs(bz) > this.ARENA_BOUNDS - 2
-        )
+        if (Math.abs(bx) > this.ARENA_BOUNDS || Math.abs(bz) > this.ARENA_BOUNDS)
           continue;
 
-        // Check distance to all megaliths and other barricades
         const allObs = [...megaliths, ...barricades];
         const tooClose = allObs.some(
           (obs) => Math.hypot(obs.x - bx, obs.z - bz) < this.MIN_OBSTACLE_SPACING
         );
         if (!tooClose) {
-          valid = true;
+          midValid = true;
         }
       }
 
-      if (valid) {
+      if (midValid) {
         barricades.push({
-          id: `barricade_${idx}_0`,
+          id: `barricade_${idx}_mid`,
           type: 'BARRICADE',
           x: bx,
           z: bz,
-          width: isHorizontal ? bLen : bThick,
+          width: isHoriz ? bLen : bThick,
           height: 1.9,
-          depth: isHorizontal ? bThick : bLen,
+          depth: isHoriz ? bThick : bLen,
           rotationY: (rng() - 0.5) * 0.15,
         });
       }
 
-      // In 2 quadrants, place an extra flanking barricade
-      if (idx % 2 === 1) {
-        let extraValid = false;
-        let extraAttempts = 0;
-        let eBx = 0;
-        let eBz = 0;
-        const eHorizontal = !isHorizontal;
+      // --- Outer Wall-Flank Barricade (30m - 40m, providing tactical cover near the perimeter) ---
+      let outerAttempts = 0;
+      let outerValid = false;
+      let obx = 0;
+      let obz = 0;
+      // Along perimeter walls: either parallel to X wall or Z wall
+      const isWallAlongX = rng() > 0.5;
 
-        while (extraAttempts < 25 && !extraValid) {
-          extraAttempts++;
-          eBx = q.signX * (12 + rng() * 16);
-          eBz = q.signZ * (12 + rng() * 16);
-
-          const distCenter = Math.hypot(eBx, eBz);
-          if (distCenter < this.SAFE_RADIUS + 1.0) continue;
-          if (
-            Math.abs(eBx) > this.ARENA_BOUNDS - 2 ||
-            Math.abs(eBz) > this.ARENA_BOUNDS - 2
-          )
-            continue;
-
-          const allObs = [...megaliths, ...barricades];
-          const tooClose = allObs.some(
-            (obs) =>
-              Math.hypot(obs.x - eBx, obs.z - eBz) < this.MIN_OBSTACLE_SPACING
-          );
-          if (!tooClose) {
-            extraValid = true;
-          }
+      while (outerAttempts < 30 && !outerValid) {
+        outerAttempts++;
+        if (isWallAlongX) {
+          obx = q.signX * (16 + rng() * 20); // 16m to 36m along wall
+          obz = q.signZ * (32 + rng() * 8);  // 32m to 40m close to perimeter wall
+        } else {
+          obx = q.signX * (32 + rng() * 8);  // 32m to 40m close to perimeter wall
+          obz = q.signZ * (16 + rng() * 20); // 16m to 36m along wall
         }
 
-        if (extraValid) {
-          barricades.push({
-            id: `barricade_${idx}_1`,
-            type: 'BARRICADE',
-            x: eBx,
-            z: eBz,
-            width: eHorizontal ? 5.4 : bThick,
-            height: 1.9,
-            depth: eHorizontal ? bThick : 5.4,
-            rotationY: (rng() - 0.5) * 0.15,
-          });
+        if (
+          Math.abs(obx) > this.ARENA_BOUNDS ||
+          Math.abs(obz) > this.ARENA_BOUNDS
+        )
+          continue;
+
+        const allObs = [...megaliths, ...barricades];
+        const tooClose = allObs.some(
+          (obs) =>
+            Math.hypot(obs.x - obx, obs.z - obz) < this.MIN_OBSTACLE_SPACING
+        );
+        if (!tooClose) {
+          outerValid = true;
         }
+      }
+
+      if (outerValid) {
+        barricades.push({
+          id: `barricade_${idx}_outer`,
+          type: 'BARRICADE',
+          x: obx,
+          z: obz,
+          width: isWallAlongX ? 6.2 : bThick,
+          height: 1.9,
+          depth: isWallAlongX ? bThick : 6.2,
+          rotationY: (rng() - 0.5) * 0.12,
+        });
       }
     });
 
-    // 3. Generate 1 Iron Brazier per quadrant in the inner perimeter ring (11m to 16m)
-    quadrants.forEach((q, idx) => {
+    // 3. Generate Braziers / Lamps (6 total: 2 Inner, 2 Mid, 2 Outer Wall-Flank)
+    // Distributed across varied depths so lamps are NOT always clustered in the middle!
+    const brazierConfigs = [
+      // 2 Inner / Near-Center Lamps (12m - 18m)
+      { q: quadrants[0], minD: 12, maxD: 17 },
+      { q: quadrants[2], minD: 12, maxD: 17 },
+      // 2 Mid-Field Lamps (21m - 28m)
+      { q: quadrants[1], minD: 21, maxD: 28 },
+      { q: quadrants[3], minD: 21, maxD: 28 },
+      // 2 Outer Wall-Flank Lamps (32m - 39m, illuminating the dark perimeter ruins)
+      { q: quadrants[0], minD: 32, maxD: 39 },
+      { q: quadrants[2], minD: 32, maxD: 39 },
+    ];
+
+    brazierConfigs.forEach((cfg, idx) => {
       let bX = 0;
       let bZ = 0;
       let valid = false;
       let attempts = 0;
 
-      while (attempts < 30 && !valid) {
+      while (attempts < 35 && !valid) {
         attempts++;
-        const angle = q.baseAngle + (rng() - 0.5) * 0.5;
-        const dist = this.SAFE_RADIUS + 1.0 + rng() * 5.0; // 11.0m to 16.0m
+        const angle = cfg.q.baseAngle + (rng() - 0.5) * 0.7;
+        const dist = cfg.minD + rng() * (cfg.maxD - cfg.minD);
         bX = Math.cos(angle) * dist;
         bZ = Math.sin(angle) * dist;
 
@@ -213,8 +256,8 @@ export class ArenaLayoutGenerator {
         )
           continue;
 
-        const allObs = [...megaliths, ...barricades, ...braziers];
-        const tooClose = allObs.some(
+        const allItems = [...megaliths, ...barricades, ...braziers];
+        const tooClose = allItems.some(
           (obs) => Math.hypot(obs.x - bX, obs.z - bZ) < 4.5
         );
         if (!tooClose) {
@@ -223,9 +266,8 @@ export class ArenaLayoutGenerator {
       }
 
       if (!valid) {
-        // Fallback default position in quadrant
-        bX = q.signX * 12;
-        bZ = q.signZ * 12;
+        bX = cfg.q.signX * ((cfg.minD + cfg.maxD) / 2);
+        bZ = cfg.q.signZ * ((cfg.minD + cfg.maxD) / 2);
       }
 
       braziers.push({
@@ -250,15 +292,14 @@ export class ArenaLayoutGenerator {
     rng: () => number = Math.random
   ): Point2D {
     const minDistance = 24.0;
-    const maxDistance = 32.0;
+    const maxDistance = 35.0;
     const allObstacles = [...layout.megaliths, ...layout.barricades];
 
-    // Try up to 30 randomized samples in the distance fog
-    for (let i = 0; i < 30; i++) {
-      // If player is close to arena edge, bias spawn angle toward arena center
+    // Try up to 35 randomized samples in the distance fog across the arena
+    for (let i = 0; i < 35; i++) {
       let angle = rng() * Math.PI * 2;
       const playerDistFromOrigin = Math.hypot(playerPos.x, playerPos.z);
-      if (playerDistFromOrigin > 22) {
+      if (playerDistFromOrigin > 20) {
         const centerAngle = Math.atan2(-playerPos.z, -playerPos.x);
         angle = centerAngle + (rng() - 0.5) * Math.PI * 1.3;
       }
@@ -276,7 +317,7 @@ export class ArenaLayoutGenerator {
         continue;
       }
 
-      // Check distance against obstacles (ensure outside expanded bounding box & not close to center)
+      // Check distance against obstacles
       const collidesWithObstacle = allObstacles.some((obs) => {
         const halfW = obs.width / 2 + 1.2;
         const halfD = obs.depth / 2 + 1.2;

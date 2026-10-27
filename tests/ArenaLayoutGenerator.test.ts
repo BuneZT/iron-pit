@@ -73,6 +73,33 @@ describe('ArenaLayoutGenerator', () => {
     }
   });
 
+  it('distributes braziers across varied depths (both inner court and outer perimeter)', () => {
+    const layout = ArenaLayoutGenerator.generate(42);
+    const innerLamps = layout.braziers.filter(
+      (b) => Math.hypot(b.x, b.z) <= 20.0
+    );
+    const outerLamps = layout.braziers.filter(
+      (b) => Math.hypot(b.x, b.z) >= 30.0
+    );
+
+    // Lamps must NOT all be clustered in the middle
+    expect(innerLamps.length).toBeGreaterThanOrEqual(1);
+    expect(outerLamps.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('populates outer zones near walls with barricades and ruins (>= 30m from center)', () => {
+    const layout = ArenaLayoutGenerator.generate(42);
+    const outerBarricades = layout.barricades.filter(
+      (b) => Math.hypot(b.x, b.z) >= 30.0
+    );
+    const outerMegaliths = layout.megaliths.filter(
+      (m) => Math.hypot(m.x, m.z) >= 30.0
+    );
+
+    expect(outerBarricades.length).toBeGreaterThanOrEqual(2);
+    expect(outerMegaliths.length).toBeGreaterThanOrEqual(1);
+  });
+
   it('generates different layouts with different seeds / runs', () => {
     const layoutA = ArenaLayoutGenerator.generate(1);
     const layoutB = ArenaLayoutGenerator.generate(999);
