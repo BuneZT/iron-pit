@@ -52,6 +52,7 @@ export class PlayerController {
       scene
     );
     this.camera.minZ = 0.1;
+    this.camera.maxZ = 49.2;
     this.camera.fov = 1.1;
     this.camera.inputs.clear();
     scene.activeCamera = this.camera;

@@ -111,4 +111,10 @@ describe('PlayerController Jump Mechanics', () => {
     expect(player.position.x).toBe(49.2);
     expect(player.position.z).toBe(-49.2);
   });
+
+  it('restricts camera maxZ below 50m to prevent seeing arena bounds from center', () => {
+    const { player } = createTestScene();
+    expect(player.camera.maxZ).toBeLessThan(50);
+    expect(player.camera.maxZ).toBeCloseTo(49.2, 1);
+  });
 });

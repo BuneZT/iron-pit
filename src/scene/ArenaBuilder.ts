@@ -26,7 +26,7 @@ export class ArenaBuilder {
     const fogAshGrey = new Color3(0.24, 0.25, 0.27);
     scene.clearColor = new Color4(0.24, 0.25, 0.27, 1.0);
     scene.fogMode = Scene.FOGMODE_EXP2;
-    scene.fogDensity = 0.018;
+    scene.fogDensity = 0.054;
     scene.fogColor = fogAshGrey;
     scene.collisionsEnabled = true;
 

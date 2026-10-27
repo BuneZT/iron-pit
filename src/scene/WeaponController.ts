@@ -217,7 +217,7 @@ export class WeaponController {
 
     const origin = this.camera.globalPosition.clone();
     const forward = this.camera.getForwardRay(1).direction.normalize();
-    const ray = new Ray(origin, forward, 80);
+    const ray = new Ray(origin, forward, 49.2);
 
     const pick = this.scene.pickWithRay(
       ray,
@@ -227,7 +227,7 @@ export class WeaponController {
     const hitPoint =
       pick && pick.hit && pick.pickedPoint
         ? pick.pickedPoint.clone()
-        : origin.add(forward.scale(60));
+        : origin.add(forward.scale(40.7));
 
     const enemyId =
       pick &&
