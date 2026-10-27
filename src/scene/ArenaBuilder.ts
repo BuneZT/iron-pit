@@ -95,6 +95,7 @@ export class ArenaBuilder {
     this.floorMat = new StandardMaterial('retroFloorMat', this.scene);
     this.floorMat.diffuseTexture = floorTexture;
     this.floorMat.specularColor = new Color3(0.01, 0.01, 0.01);
+    this.floorMat.maxSimultaneousLights = 10;
 
     const wallTexture = new Texture(
       `${base}/assets/textures/dungeon_wall.png`,
@@ -108,6 +109,7 @@ export class ArenaBuilder {
     this.wallMat = new StandardMaterial('retroWallMat', this.scene);
     this.wallMat.diffuseTexture = wallTexture;
     this.wallMat.specularColor = new Color3(0.01, 0.01, 0.01);
+    this.wallMat.maxSimultaneousLights = 10;
 
     const cryptTexture = new Texture(
       `${base}/assets/textures/crypt_stone.png`,
@@ -121,6 +123,7 @@ export class ArenaBuilder {
     this.cryptMat = new StandardMaterial('retroCryptMat', this.scene);
     this.cryptMat.diffuseTexture = cryptTexture;
     this.cryptMat.specularColor = new Color3(0.01, 0.01, 0.01);
+    this.cryptMat.maxSimultaneousLights = 10;
 
     const ironTexture = new Texture(
       `${base}/assets/textures/rusted_iron.png`,
@@ -134,6 +137,7 @@ export class ArenaBuilder {
     this.ironMat = new StandardMaterial('retroIronMat', this.scene);
     this.ironMat.diffuseTexture = ironTexture;
     this.ironMat.specularColor = new Color3(0.12, 0.1, 0.08);
+    this.ironMat.maxSimultaneousLights = 10;
 
     this.emberMat = new StandardMaterial('brazierEmberMat', this.scene);
     this.emberMat.diffuseColor = new Color3(1.0, 0.55, 0.1);
@@ -533,8 +537,8 @@ export class ArenaBuilder {
       );
       fireLight.diffuse = new Color3(1.0, 0.62, 0.22);
       fireLight.specular = new Color3(1.0, 0.7, 0.3);
-      fireLight.intensity = 0.85;
-      fireLight.range = 18.0;
+      fireLight.intensity = 0.95;
+      fireLight.range = 22.0;
 
       this.brazierLights.push(fireLight);
     });

@@ -117,4 +117,11 @@ describe('ArenaBuilder brazier collision', () => {
     expect(newPillar?.position.x).toBe(newLayout.megaliths[0].x);
     expect(oldPillar?.isDisposed()).toBe(true);
   });
+
+  it('configures materials to support all simultaneous lights (maxSimultaneousLights >= 8)', async () => {
+    const { scene } = await createTestEnv();
+    const floor = scene.getMeshByName('arenaFloor')!;
+    const mat = floor.material as any;
+    expect(mat.maxSimultaneousLights).toBeGreaterThanOrEqual(8);
+  });
 });

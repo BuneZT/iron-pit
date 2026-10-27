@@ -112,11 +112,13 @@ export class EnemyController {
     bodyMat.diffuseTexture = ironTex;
     bodyMat.diffuseColor = new Color3(0.58, 0.52, 0.48);
     bodyMat.specularColor = new Color3(0.1, 0.09, 0.08);
+    bodyMat.maxSimultaneousLights = 10;
 
     // Weathered bone / horn material
     const hornMat = new StandardMaterial(`enemyHornMat_${id}`, this.scene);
     hornMat.diffuseColor = new Color3(0.38, 0.35, 0.28);
     hornMat.specularColor = new Color3(0.04, 0.04, 0.04);
+    hornMat.maxSimultaneousLights = 10;
 
     // Glowing demonic amber/crimson eye visor
     const visorMat = new StandardMaterial(`enemyVisorMat_${id}`, this.scene);

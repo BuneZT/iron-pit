@@ -57,14 +57,17 @@ export class WeaponController {
     darkIronMat.diffuseTexture = ironTex;
     darkIronMat.diffuseColor = new Color3(0.7, 0.68, 0.68);
     darkIronMat.specularColor = new Color3(0.2, 0.2, 0.22);
+    darkIronMat.maxSimultaneousLights = 10;
 
     const agedWoodMat = new StandardMaterial('gunWoodMat', scene);
     agedWoodMat.diffuseColor = new Color3(0.24, 0.16, 0.1);
     agedWoodMat.specularColor = new Color3(0.08, 0.06, 0.04);
+    agedWoodMat.maxSimultaneousLights = 10;
 
     const brassMat = new StandardMaterial('gunBrassMat', scene);
     brassMat.diffuseColor = new Color3(0.68, 0.52, 0.22);
     brassMat.specularColor = new Color3(0.5, 0.4, 0.15);
+    brassMat.maxSimultaneousLights = 10;
 
     // 1. Heavy Blackened Iron Receiver
     const receiver = MeshBuilder.CreateBox(
