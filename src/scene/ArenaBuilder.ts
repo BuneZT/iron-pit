@@ -426,6 +426,7 @@ export class ArenaBuilder {
       );
       pedestal.position.set(pos.x, 0.7, pos.z);
       pedestal.material = ironMat;
+      pedestal.checkCollisions = true;
       pedestal.isPickable = true;
       shadowGenerator.addShadowCaster(pedestal);
       new PhysicsAggregate(
@@ -444,7 +445,15 @@ export class ArenaBuilder {
       bowl.position.set(pos.x, 1.62, pos.z);
       bowl.rotation.y = idx * 0.4;
       bowl.material = ironMat;
-      bowl.isPickable = false;
+      bowl.checkCollisions = true;
+      bowl.isPickable = true;
+      shadowGenerator.addShadowCaster(bowl);
+      new PhysicsAggregate(
+        bowl,
+        PhysicsShapeType.CYLINDER,
+        { mass: 0, friction: 0.8, restitution: 0.1 },
+        scene
+      );
 
       // Glowing embers
       const embers = MeshBuilder.CreateSphere(
