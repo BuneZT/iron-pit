@@ -103,4 +103,12 @@ describe('PlayerController Jump Mechanics', () => {
     expect(velMidAirAfter).toBeLessThan(velMidAirBefore);
     expect(velMidAirAfter).toBeLessThan(velAfterJump1);
   });
+
+  it('clamps player within 100m arena boundary (±49.2m)', () => {
+    const { player } = createTestScene();
+    player.position.set(60, 0.9, -60);
+    player.update(0.016);
+    expect(player.position.x).toBe(49.2);
+    expect(player.position.z).toBe(-49.2);
+  });
 });

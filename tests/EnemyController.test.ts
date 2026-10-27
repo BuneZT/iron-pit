@@ -103,4 +103,12 @@ describe('EnemyController Jump & Vault Mechanics', () => {
     expect(enemy.stuckTimer).toBe(0);
     expect(enemy.jumpCooldown).toBeGreaterThan(1.0);
   });
+
+  it('clamps enemy within 100m arena boundary (±49.2m)', async () => {
+    const { controller, enemy } = await createTestEnv();
+    enemy.root.position.set(-60, 0.9, 60);
+    controller.update(0.016, new Vector3(0, 0.9, 0), 1);
+    expect(enemy.root.position.x).toBe(-49.2);
+    expect(enemy.root.position.z).toBe(49.2);
+  });
 });
