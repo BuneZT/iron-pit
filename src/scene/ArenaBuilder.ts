@@ -26,7 +26,7 @@ export class ArenaBuilder {
     const fogAshGrey = new Color3(0.24, 0.25, 0.27);
     scene.clearColor = new Color4(0.24, 0.25, 0.27, 1.0);
     scene.fogMode = Scene.FOGMODE_EXP2;
-    scene.fogDensity = 0.038;
+    scene.fogDensity = 0.018;
     scene.fogColor = fogAshGrey;
     scene.collisionsEnabled = true;
 
@@ -46,7 +46,7 @@ export class ArenaBuilder {
       new Vector3(-0.4, -1, -0.3).normalize(),
       scene
     );
-    dirLight.position = new Vector3(16, 28, 14);
+    dirLight.position = new Vector3(35, 45, 30);
     dirLight.intensity = 0.45;
     dirLight.diffuse = new Color3(0.75, 0.76, 0.78);
 
@@ -63,8 +63,8 @@ export class ArenaBuilder {
       true,
       Texture.NEAREST_SAMPLINGMODE
     );
-    floorTexture.uScale = 16;
-    floorTexture.vScale = 16;
+    floorTexture.uScale = 40;
+    floorTexture.vScale = 40;
     const floorMat = new StandardMaterial('retroFloorMat', scene);
     floorMat.diffuseTexture = floorTexture;
     floorMat.specularColor = new Color3(0.01, 0.01, 0.01);
@@ -112,8 +112,8 @@ export class ArenaBuilder {
     emberMat.diffuseColor = new Color3(1.0, 0.55, 0.1);
     emberMat.emissiveColor = new Color3(1.0, 0.45, 0.05);
 
-    // 3. 40m x 40m Open Flagstone Floor
-    const arenaSize = 40;
+    // 3. 100m x 100m Open Flagstone Floor
+    const arenaSize = 100;
     const floor = MeshBuilder.CreateBox(
       'arenaFloor',
       { width: arenaSize, height: 1, depth: arenaSize },
@@ -211,7 +211,7 @@ export class ArenaBuilder {
       );
 
       // Gothic rusted iron spikes along parapet top (with crooked tilts & variable heights)
-      const spikeCount = 14;
+      const spikeCount = 36;
       const step = arenaSize / spikeCount;
       for (let i = -spikeCount / 2; i <= spikeCount / 2; i++) {
         const tiltZ = Math.sin(i * 3.7 + cfg.x * 2.1) * 0.18;
@@ -241,10 +241,10 @@ export class ArenaBuilder {
 
     // 5. Gothic Monoliths & Crypt Barricades (with weathered chips, uneven caps & fallen rubble)
     const megaliths = [
-      { x: -9, z: -9, w: 2.8, h: 3.8, d: 2.8 },
-      { x: 9, z: -9, w: 2.8, h: 3.8, d: 2.8 },
-      { x: -9, z: 9, w: 2.8, h: 3.8, d: 2.8 },
-      { x: 9, z: 9, w: 2.8, h: 3.8, d: 2.8 },
+      { x: -22.5, z: -22.5, w: 3.6, h: 4.8, d: 3.6 },
+      { x: 22.5, z: -22.5, w: 3.6, h: 4.8, d: 3.6 },
+      { x: -22.5, z: 22.5, w: 3.6, h: 4.8, d: 3.6 },
+      { x: 22.5, z: 22.5, w: 3.6, h: 4.8, d: 3.6 },
     ];
 
     megaliths.forEach((obs, idx) => {
@@ -273,12 +273,12 @@ export class ArenaBuilder {
         {
           diameterTop: obs.w * 0.78,
           diameterBottom: obs.w * 1.04,
-          height: 0.65,
+          height: 0.8,
           tessellation: 5,
         },
         scene
       );
-      cap.position.set(obs.x + 0.06, obs.h + 0.3, obs.z - 0.05);
+      cap.position.set(obs.x + 0.06, obs.h + 0.38, obs.z - 0.05);
       cap.rotation.set(0.08, idx * 0.9, -0.06);
       cap.material = cryptMat;
       cap.isPickable = true;
@@ -287,13 +287,13 @@ export class ArenaBuilder {
       // Fallen weathered stone rubble block at base
       const rubble = MeshBuilder.CreateBox(
         `megalithRubble_${idx}`,
-        { width: 0.95, height: 0.48, depth: 0.8 },
+        { width: 1.2, height: 0.55, depth: 1.0 },
         scene
       );
       rubble.position.set(
-        obs.x + (idx % 2 === 0 ? 1.7 : -1.7),
-        0.24,
-        obs.z + (idx > 1 ? 1.6 : -1.6)
+        obs.x + (idx % 2 === 0 ? 2.2 : -2.2),
+        0.28,
+        obs.z + (idx > 1 ? 2.1 : -2.1)
       );
       rubble.rotation.set(0.14, idx * 1.3, -0.18);
       rubble.material = cryptMat;
@@ -312,7 +312,7 @@ export class ArenaBuilder {
       for (const bandY of [obs.h * 0.35, obs.h * 0.75]) {
         const band = MeshBuilder.CreateBox(
           `pillarBand_${idx}_${bandY.toFixed(1)}`,
-          { width: obs.w + 0.12, height: 0.22, depth: obs.d + 0.12 },
+          { width: obs.w + 0.14, height: 0.26, depth: obs.d + 0.14 },
           scene
         );
         band.position.set(obs.x, bandY, obs.z);
@@ -324,10 +324,10 @@ export class ArenaBuilder {
 
     // Heavy crypt slab barricades with chipped corners & fallen fragments
     const barricades = [
-      { x: 0, z: -13, w: 4.6, h: 1.9, d: 1.4 },
-      { x: 0, z: 13, w: 4.6, h: 1.9, d: 1.4 },
-      { x: -13, z: 0, w: 1.4, h: 1.9, d: 4.6 },
-      { x: 13, z: 0, w: 1.4, h: 1.9, d: 4.6 },
+      { x: 0, z: -32, w: 6.4, h: 1.9, d: 1.4 },
+      { x: 0, z: 32, w: 6.4, h: 1.9, d: 1.4 },
+      { x: -32, z: 0, w: 1.4, h: 1.9, d: 6.4 },
+      { x: 32, z: 0, w: 1.4, h: 1.9, d: 6.4 },
     ];
 
     barricades.forEach((obs, idx) => {
@@ -363,13 +363,13 @@ export class ArenaBuilder {
       // Small fallen stone block at barricade end
       const frag = MeshBuilder.CreateBox(
         `barricadeFrag_${idx}`,
-        { width: 0.7, height: 0.35, depth: 0.6 },
+        { width: 0.8, height: 0.4, depth: 0.7 },
         scene
       );
       frag.position.set(
-        obs.x + (obs.w > obs.d ? obs.w / 2 + 0.4 : 0),
-        0.18,
-        obs.z + (obs.d > obs.w ? obs.d / 2 + 0.4 : 0)
+        obs.x + (obs.w > obs.d ? obs.w / 2 + 0.5 : 0),
+        0.2,
+        obs.z + (obs.d > obs.w ? obs.d / 2 + 0.5 : 0)
       );
       frag.rotation.set(-0.1, idx * 0.8, 0.15);
       frag.material = wallMat;
@@ -385,10 +385,10 @@ export class ArenaBuilder {
 
     // 6. 4 Gothic Iron Fire-Braziers with Dynamic Warm Amber Lights
     const brazierPositions = [
-      new Vector3(-5.5, 0, 0),
-      new Vector3(5.5, 0, 0),
-      new Vector3(0, 0, -5.5),
-      new Vector3(0, 0, 5.5),
+      new Vector3(-12, 0, 0),
+      new Vector3(12, 0, 0),
+      new Vector3(0, 0, -12),
+      new Vector3(0, 0, 12),
     ];
 
     const brazierLights: PointLight[] = [];
@@ -464,8 +464,8 @@ export class ArenaBuilder {
       );
       fireLight.diffuse = new Color3(1.0, 0.62, 0.22);
       fireLight.specular = new Color3(1.0, 0.7, 0.3);
-      fireLight.intensity = 0.82;
-      fireLight.range = 11.0;
+      fireLight.intensity = 0.85;
+      fireLight.range = 18.0;
 
       brazierLights.push(fireLight);
     });
@@ -476,16 +476,16 @@ export class ArenaBuilder {
     sigilMat.emissiveColor = new Color3(0.65, 0.12, 0.08);
 
     const spawnPoints = [
-      new Vector3(-16, 1.1, -16),
-      new Vector3(16, 1.1, -16),
-      new Vector3(-16, 1.1, 16),
-      new Vector3(16, 1.1, 16),
+      new Vector3(-42, 1.1, -42),
+      new Vector3(42, 1.1, -42),
+      new Vector3(-42, 1.1, 42),
+      new Vector3(42, 1.1, 42),
     ];
 
     spawnPoints.forEach((pt, idx) => {
       const sigil = MeshBuilder.CreateCylinder(
         `spawnSigil_${idx}`,
-        { diameter: 2.8, height: 0.05, tessellation: 12 },
+        { diameter: 3.2, height: 0.05, tessellation: 12 },
         scene
       );
       sigil.position.set(pt.x, 0.03, pt.z);
