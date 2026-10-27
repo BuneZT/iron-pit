@@ -33,7 +33,7 @@ const SOUND_FILES: Record<SoundEffect, SoundConfig> = {
 
 const MUSIC_FILE = {
   url: `${BASE}/assets/audio/music_ambient.ogg`,
-  baseVolume: 0.45,
+  baseVolume: 0.80,
 };
 
 export class AudioManager {
